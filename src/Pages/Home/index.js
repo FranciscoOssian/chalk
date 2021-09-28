@@ -1,62 +1,42 @@
 import * as React from 'react';
 import { Text, View, Image, StyleSheet, ScrollView } from 'react-native'
 
-const StoryBubble = ({ online, picture, name }) => {
-  return (
-    <View style={StoryStyle.container}>
-      <View>
-        <Image
-          style={StoryStyle.Image}
-          source={{ uri: picture }}
-        />
-        {online ? <View style={StoryStyle.onLine}></View> : <></>}
-      </View>
-      <Text style={StoryStyle.name}>{name}</Text>
-    </View>
+import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
+
+import Story from './Components/Story'
+import Chat from './Components/Chat'
+
+const storys = []
+
+for (let i = 0; i < 50; ++i) {
+  storys.push({ id: i, picture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg', online: true, name: 'name' })
+}
+
+const chats = []
+
+function randomDate(start, end) {
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+
+for (let i = 0; i < 70; ++i) {
+  chats.push(
+    {
+      id: i,
+      picture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg',
+      name: `nameP${i}`,
+      lastMessage: {
+        content: `👍👍👍👍👍👍👍👍👍hkoooolklk👍👍👍kk ${parseInt(Math.random() * 100)} oi`,
+        timestamp: randomDate(new Date(2012, 0, 1), new Date()),
+        view: true,
+        senderUID: 'ddd'
+      }
+    }
   )
 }
 
-const StoryStyle = StyleSheet.create({
-  Image: {
-    width: 52,
-    height: 52,
-    borderRadius: 100,
-    position: 'absolute'
-  },
-  onLine: {
-    backgroundColor: '#5AD439',
-    borderWidth: 3,
-    borderRadius: 100,
-    borderColor: '#ffffff',
-    width: 15,
-    height: 15,
-    top: 35,
-    left: 35
-  },
-  name: {
-    top: 30,
-    color: 'rgba(0, 0, 0, 0.35)',
-    fontFamily: 'Assistant',
-    fontStyle: 'normal',
-    fontWeight: 'normal',
-    fontSize: 13,
-    lineHeight: 18,
-    textAlign: 'center',
-    letterSpacing: -0.08,
-
-    width: 50,
-
-    marginTop: 7
-  },
-  container: {
-    marginBottom: 30,
-    marginHorizontal: 20
-  }
-})
-
 const Home = () => {
   return (
-    <ScrollView>
+    <View>
       <View style={styles.Head}>
         <Image
           style={styles.Perfil}
@@ -64,16 +44,45 @@ const Home = () => {
         />
         <Text style={styles.HeadText}>Chats</Text>
       </View>
+      <ScrollView style={{height: '70%'}}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginTop: 7 }}
+        >
+          <Story picture="https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg" online={false} name="Your Story" />
+          {
+            storys.map(story => <Story key={story.id} picture={story.picture} online={story.online} name={story.name} />)
+          }
+        </ScrollView>
 
-      <ScrollView
-        horizontal
-        style={{marginTop: 7}}
-      >
-        <StoryBubble picture='https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' online name="nome" />
-        <StoryBubble picture='https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' online name="nome" />
+
+        {
+          chats.map(
+            chat =>
+              <Chat
+                yourUID='ddd'
+                key={chat.id}
+                picture={chat.picture}
+                name={chat.name}
+                lastMessage={chat.lastMessage}
+              />
+          )
+        }
       </ScrollView>
 
-    </ScrollView>
+      <View style={{ height: 76, width: '100%', backgroundColor: 'blue' }}>
+        <Text>AdSense place</Text>
+      </View>
+
+      <View style={{ height: 76, width: '100%', alignItems: 'center' }}>
+        <SearchSvgComponent
+          primaryColor="#0584FE"
+          secondaryColor="rgb(255,255,255)"
+        />
+      </View>
+
+    </View>
   )
 }
 
