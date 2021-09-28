@@ -34,7 +34,7 @@ for (let i = 0; i < 70; ++i) {
   )
 }
 
-const Home = () => {
+const Home = ({ navigation }) => {
   return (
     <View>
       <View style={styles.Head}>
@@ -44,7 +44,7 @@ const Home = () => {
         />
         <Text style={styles.HeadText}>Chats</Text>
       </View>
-      <ScrollView style={{height: '70%'}}>
+      <ScrollView style={{ height: '70%' }}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -74,13 +74,14 @@ const Home = () => {
       <View style={{ height: 76, width: '100%', backgroundColor: 'blue' }}>
         <Text>AdSense place</Text>
       </View>
+        <View style={{ height: 76, width: '100%', alignItems: 'center' }}>
+          <SearchSvgComponent
+          onPress={ () => navigation.navigate('SearchPerson')}
+            primaryColor="#0584FE"
+            secondaryColor="rgb(255,255,255)"
+          />
+        </View>
 
-      <View style={{ height: 76, width: '100%', alignItems: 'center' }}>
-        <SearchSvgComponent
-          primaryColor="#0584FE"
-          secondaryColor="rgb(255,255,255)"
-        />
-      </View>
 
     </View>
   )
