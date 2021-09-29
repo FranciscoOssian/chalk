@@ -1,9 +1,11 @@
 import * as React from 'react';
-import { Text, View, Image, StyleSheet, ScrollView } from 'react-native'
+import { Text, View, Image, StyleSheet, ScrollView, TextInput } from 'react-native'
 
 import BackScreen from '../../../assests/images/global/navigation'
 import VideoCall from '../../../assests/images/global/videoCall'
 import VoiceCall from '../../../assests/images/global/voiceCall'
+import Audio from '../../../assests/images/pages/Chat/Audio'
+import Camera from '../../../assests/images/pages/Chat/Camera'
 
 import Message from './Components/Message'
 
@@ -47,7 +49,7 @@ for (let i = 0; i < 100; ++i) {
 const Chat = () => {
   return (
 
-    <View>
+    <View style={{ height: '100%', justifyContent: 'space-between' }}>
 
       <View style={styles.header}>
         <BackScreen />
@@ -67,53 +69,65 @@ const Chat = () => {
         </View>
       </View>
 
-      <ScrollView>
+      <View style={{ height: '79.93%' }}>
 
-        <View style={styles.startChat}>
-          <Image
-            source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
-            style={{ width: 100, height: 100, borderRadius: 100 }}
-          />
-          <Text style={[styles.startChatPersonName, styles.fontfont]}>Jacob</Text>
-          <Text style={[styles.startChatDescription, styles.font]}>You’re on Chat</Text>
-          <View style={styles.newFriend}>
-            <View style={styles.imageDuo}>
-              <Image
-                source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
-                style={[styles.imageDuoImage, { left: 7.5 }]}
-              />
-              <Image
-                source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
-                style={[styles.imageDuoImage, { left: -7.5 }]}
-              />
-            </View>
-            <Text style={styles.newFriendMessage}>Say hi to your new  friend, Jacob.</Text>
-          </View>
-        </View>
+        <ScrollView>
 
-        {
-          chat.messages.map((message, index, e) => {
-            const useSpace = chat.messages[index].from != chat.messages[index + 1]?.from
-            return (
-              <View key={message.id}>
-                <Message
-                  from={message.from}
-                  timestamp={message.timestamp}
-                  content={message.content}
-                  profilePicture={message.profilePicture}
-                  yourUID='ddd'
+          <View style={styles.startChat}>
+            <Image
+              source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
+              style={{ width: 100, height: 100, borderRadius: 100 }}
+            />
+            <Text style={[styles.startChatPersonName, styles.fontfont]}>Jacob</Text>
+            <Text style={[styles.startChatDescription, styles.font]}>You’re on Chat</Text>
+            <View style={styles.newFriend}>
+              <View style={styles.imageDuo}>
+                <Image
+                  source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
+                  style={[styles.imageDuoImage, { left: 7.5 }]}
                 />
-                {useSpace ? <View style={{ width: '100%', height: 30 }}></View> : <></>}
+                <Image
+                  source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
+                  style={[styles.imageDuoImage, { left: -7.5 }]}
+                />
               </View>
+              <Text style={styles.newFriendMessage}>Say hi to your new  friend, Jacob.</Text>
+            </View>
+          </View>
+
+          {
+            chat.messages.map((message, index, e) => {
+              const useSpace = chat.messages[index].from != chat.messages[index + 1]?.from
+              return (
+                <View key={message.id}>
+                  <Message
+                    from={message.from}
+                    timestamp={message.timestamp}
+                    content={message.content}
+                    profilePicture={message.profilePicture}
+                    yourUID='ddd'
+                  />
+                  {useSpace ? <View style={{ width: '100%', height: 30 }}></View> : <></>}
+                </View>
+              )
+            }
+
             )
           }
 
-          )
-        }
+        </ScrollView>
 
-        <View style={{ paddingBottom: '25%' }} ></View>
+      </View>
 
-      </ScrollView>
+
+      <View style={{ width: '100%', height: '11.3%', alignItems: 'center', flexDirection: 'row', justifyContent: 'space-around'}}>
+        <Audio/>
+        <TextInput
+          style={styles.TextInput}
+          placeholder="Aa"
+        />
+        <Camera/>
+      </View>
 
     </View>
 
@@ -214,6 +228,13 @@ const styles = StyleSheet.create({
     letterSpacing: -0.01,
 
     color: 'rgba(0, 0, 0, 0.3)'
+  },
+  TextInput: {
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    borderRadius: 18,
+
+    width: '71.2%',
+    height: '50.3%'
   }
 })
 
