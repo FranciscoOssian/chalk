@@ -2,10 +2,21 @@ import * as React from 'react';
 import { Text, View, Image, StyleSheet, ScrollView } from 'react-native'
 
 const MyMessage = ({ content, profilePicture }) => {
+
+    const isImageContent = content?.type === 'image' ? true : false
+
     return (
         <View style={[styles.message, { justifyContent: 'flex-end' }]}>
             <View style={[styles.content, styles.contentMyMessage]}>
-                <Text>{content}</Text>
+                {
+                    isImageContent ?
+                        <Image
+                            source={{ uri: content.uri }}
+                            style={{width: '100%', height: 150}}
+                        />
+                        :
+                        <Text>{content}</Text>
+                }
             </View>
             <Image
                 source={{ uri: profilePicture }}
@@ -16,6 +27,9 @@ const MyMessage = ({ content, profilePicture }) => {
 }
 
 const FriendMessage = ({ content, profilePicture }) => {
+
+    const isImageContent = content?.type === 'image' ? true : false
+
     return (
         <View style={[styles.message]}>
             <Image
@@ -23,7 +37,15 @@ const FriendMessage = ({ content, profilePicture }) => {
                 style={{ width: 28, height: 28, borderRadius: 100 }}
             />
             <View style={[styles.content, styles.contentFriendMessage]}>
-                <Text>{content}</Text>
+                {
+                    isImageContent ?
+                        <Image
+                            source={{ uri: content.uri }}
+                            style={{width: '100%', height: 150}}
+                        />
+                        :
+                        <Text>{content}</Text>
+                }
             </View>
         </View>
     )

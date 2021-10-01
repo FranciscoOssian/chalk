@@ -1,5 +1,7 @@
-import * as React from 'react';
+import React, {useEffect, useState} from 'react';
 import { Text, View, Image, StyleSheet, ScrollView, TextInput } from 'react-native'
+import RNFetchBlob from 'rn-fetch-blob'
+import { launchImageLibrary } from 'react-native-image-picker';
 
 import BackScreen from '../../../assests/images/global/navigation'
 import VideoCall from '../../../assests/images/global/videoCall'
@@ -12,8 +14,6 @@ import Message from './Components/Message'
 function randomDate(start, end) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
-
-
 const chat = {
   messages: [],
   owners: [
@@ -29,7 +29,6 @@ const chat = {
     }
   ]
 }
-
 for (let i = 0; i < 100; ++i) {
   let u = Math.random()
   chat.messages.push({
@@ -37,11 +36,12 @@ for (let i = 0; i < 100; ++i) {
     from: u > 0.5 ? 'ddd' : 'eee',
     profilePicture: u > 0.5 ? chat.owners[1].profilePicture : chat.owners[0].profilePicture,
     timestamp: randomDate(new Date(2012, 0, 1), new Date()),
-    content: `${i}oi${u}bem?`
+    content: u > Math.random() ? {type:'image', uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg'} : `oi${u}?bem?`
   })
 }
 
 const A = () => {
+
   return (
     <>
       <View style={styles.header}>
