@@ -6,9 +6,6 @@ import Chat from './Pages/Chat'
 
 import Home from './Pages/Home'
 
-import Profile from './Pages/Profile'
-import ChatsProfile from './Pages/Profile/ChatsProfile'
-
 import SearchPerson from './Pages/SearchPerson'
 
 import SignIn from './Pages/Verification/SignIn'
@@ -17,6 +14,8 @@ import FirstLogin from './Pages/Verification/FirstLogin'
 
 import Account from './Pages/Profile/Account'
 import ChatProfile from './Pages/Profile/ChatProfile';
+
+import Profile from './Pages/Profile'
 
 const AppStack = createNativeStackNavigator();
 
