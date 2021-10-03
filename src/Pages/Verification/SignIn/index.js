@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { Text, StyleSheet, View, TextInput, ScrollView, Button } from 'react-native'
-import { RectButton } from 'react-native-gesture-handler';
+import { Text, StyleSheet, View, TextInput, ScrollView, Button, TouchableOpacity } from 'react-native'
 
 const SignIn = ({ navigation }) => {
   
@@ -19,14 +18,14 @@ const SignIn = ({ navigation }) => {
           onChangeText={() => { }}
         />
 
-        <RectButton
+        <TouchableOpacity
           style={styles.RectButton}
           onPress={ () => navigation.navigate('Home') }
         >
           <View style={styles.button}>
             <Text style={{ color: 'white' }}>SignIn</Text>
           </View>
-        </RectButton>
+        </TouchableOpacity>
 
         <Text onPress={() => navigation.navigate('SignUp')}>Never SignUp? SignUp, click here.</Text>
       </View>

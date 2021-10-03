@@ -1,5 +1,14 @@
-import React, {useEffect, useState} from 'react';
-import { Text, View, Image, StyleSheet, ScrollView, TextInput } from 'react-native'
+import React, { useEffect, useState } from 'react';
+import {
+  Text,
+  View,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Alert
+} from 'react-native'
 import RNFetchBlob from 'rn-fetch-blob'
 import { launchImageLibrary } from 'react-native-image-picker';
 
@@ -14,6 +23,7 @@ import Message from './Components/Message'
 function randomDate(start, end) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
+
 const chat = {
   messages: [],
   owners: [
@@ -36,31 +46,45 @@ for (let i = 0; i < 100; ++i) {
     from: u > 0.5 ? 'ddd' : 'eee',
     profilePicture: u > 0.5 ? chat.owners[1].profilePicture : chat.owners[0].profilePicture,
     timestamp: randomDate(new Date(2012, 0, 1), new Date()),
-    content: u > Math.random() ? {type:'image', uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg'} : `oi${u}?bem?`
+    content: u > Math.random() ? { type: 'image', uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' } : `oi${u}?bem?`
   })
 }
 
-const A = () => {
+const Chat = ({ navigation }) => {
 
   return (
     <>
       <View style={styles.header}>
-        <BackScreen />
-        <View style={styles.content}>
-          <Image
-            source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
-            style={{ width: 45, height: 45, borderRadius: 100 }}
-          />
-          <View>
-            <Text style={[styles.name, styles.font]}>Name</Text>
-            <Text style={[styles.status, styles.font]}>Online</Text>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Home')}
+        ><BackScreen />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Profile')}
+        >
+          <View
+            style={styles.content}
+          >
+            <Image
+              source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
+              style={{ width: 45, height: 45, borderRadius: 100 }}
+            />
+            <View>
+              <Text style={[styles.name, styles.font]}>Name</Text>
+              <Text style={[styles.status, styles.font]}>Online</Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
+
         <View style={styles.actions}>
           <VoiceCall />
           <VideoCall />
         </View>
+
       </View>
+      
       <ScrollView style={styles.scrollView}>
 
         <View style={styles.startChat}>
@@ -89,13 +113,18 @@ const A = () => {
             const useSpace = chat.messages[index].from != chat.messages[index + 1]?.from
             return (
               <View key={message.id}>
-                <Message
-                  from={message.from}
-                  timestamp={message.timestamp}
-                  content={message.content}
-                  profilePicture={message.profilePicture}
-                  yourUID='ddd'
-                />
+                <TouchableOpacity
+                  onPress={() => message.content?.type === 'image' ? Alert.alert('img') : console.log('text')}
+                  activeOpacity={0.6}
+                >
+                  <Message
+                    from={message.from}
+                    timestamp={message.timestamp}
+                    content={message.content}
+                    profilePicture={message.profilePicture}
+                    yourUID='ddd'
+                  />
+                </TouchableOpacity>
                 {useSpace ? <View style={{ width: '100%', height: 30 }}></View> : <></>}
               </View>
             )
@@ -104,20 +133,20 @@ const A = () => {
           )
         }
       </ScrollView>
-      <View style={{ width: '100%', height: '11.3%', alignItems: 'center', flexDirection: 'row', justifyContent: 'space-around'}}>
-        <Audio/>
+      <View style={{ width: '100%', height: '11.3%', alignItems: 'center', flexDirection: 'row', justifyContent: 'space-around' }}>
+        <Audio />
         <TextInput
           style={styles.TextInput}
           placeholder="Aa"
         />
-        <Camera/>
+        <Camera />
       </View>
     </>
 
   )
 }
 
-export default A
+export default Chat
 
 const styles = StyleSheet.create({
   input: {

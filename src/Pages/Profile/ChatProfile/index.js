@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {Text} from 'react-native'
 
-const ChatsProfile = () => {
+const ChatProfile = () => {
   return (
     <Text>ChatsProfile</Text>
   );
 };
 
-export default ChatsProfile;
+export default ChatProfile;

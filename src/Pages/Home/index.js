@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, Image, StyleSheet, ScrollView } from 'react-native'
+import { Text, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
 
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
@@ -38,10 +38,14 @@ const Home = ({ navigation }) => {
   return (
     <View>
       <View style={styles.Head}>
-        <Image
-          style={styles.Perfil}
-          source={{ uri: "https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg" }}
-        />
+        <TouchableOpacity
+          onPress={ () => navigation.navigate('Account') }
+        >
+          <Image
+            style={styles.Perfil}
+            source={{ uri: "https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg" }}
+          />
+        </TouchableOpacity>
         <Text style={styles.HeadText}>Chats</Text>
       </View>
       <ScrollView style={{ height: '70%' }}>
