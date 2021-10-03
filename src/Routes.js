@@ -10,7 +10,6 @@ import SearchPerson from './Pages/SearchPerson'
 
 import SignIn from './Pages/Verification/SignIn'
 import SignUp from './Pages/Verification/SignUp'
-import FirstLogin from './Pages/Verification/FirstLogin'
 
 import Account from './Pages/Profile/Account'
 import ChatProfile from './Pages/Profile/ChatProfile';
@@ -31,7 +30,6 @@ const Routes = () => {
             >
                 <Screen name="SignUp" component={SignUp} />
                 <Screen name="SignIn" component={SignIn} />
-                <Screen name="FirstLogin" component={FirstLogin} />
                 <Screen name="Home" component={Home} />
                 <Screen name="SearchPerson" component={SearchPerson} />
                 <Screen name="Profile" component={Profile} />
