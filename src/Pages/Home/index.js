@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { Text, View, Image, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native'
+import { Text, View, Image, StyleSheet, ScrollView, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native'
 
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
-//import Story from './Components/Story'
+import Story from './Components/Story'
 import Chat from './Components/Chat'
 
 const storys = []
 
-//for (let i = 0; i < 50; ++i) {
-//  storys.push({ id: i, picture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg', online: true, name: 'name' })
-//}
+for (let i = 0; i < 50; ++i) {
+  storys.push({ id: i, picture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg', online: true, name: 'name' })
+}
 
 const chats = []
 
@@ -62,9 +62,7 @@ const Home = ({ navigation }) => {
           showsHorizontalScrollIndicator={false}
           style={{ marginTop: 7 }}
         >
-          {
-            true? <></> : <Story picture="https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg" online={false} name="Your Story" />
-          }
+          <Story picture="https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg" online={false} name="Your Story" />
           {
             storys.map(story => <Story key={story.id} picture={story.picture} online={story.online} name={story.name} />)
           }
@@ -109,12 +107,19 @@ const Home = ({ navigation }) => {
           setModalVisible(!modalVisible);
         }}
       >
-        <View style={{width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center'}}>
-          <Image
-            style={{ width: '50%', height: '25%'}}
-            source={{ uri: modelImageSelected }}
-          />
-        </View>
+        <TouchableOpacity
+          style={styles.modalContainer}
+          onPress={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <TouchableWithoutFeedback>
+            <Image
+              style={{ width: '100%', height: '50%'}}
+              source={{ uri: modelImageSelected }}
+            />
+          </TouchableWithoutFeedback>
+        </TouchableOpacity>
 
       </Modal>
 
@@ -141,6 +146,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: "Assistant",
     fontStyle: 'normal'
+  },
+  modalContainer:{
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 });
 
