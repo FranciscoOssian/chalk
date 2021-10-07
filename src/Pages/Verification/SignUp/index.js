@@ -1,35 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, View, TextInput, ScrollView, TouchableOpacity } from 'react-native'
+
+import auth from '@react-native-firebase/auth'
+import useAuth from '../../../Hooks/Firebase/useAuth'
 
 const SignUp = ({ navigation }) => {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [secondPassword, setSecondPassword] = useState('')
-  const [age, setAge] = useState()
+
+  useEffect( ()=>{
+    auth().onAuthStateChanged( user => {
+      if (user) navigation.navigate('Home')
+      console.log(user)
+    })
+  },[])
+
+  const onSignUpHandler = async () => {
+    await auth().createUserWithEmailAndPassword(email, password)
+  }
+
+  const testPassword = () => {
+    if( password === '' && secondPassword === '' ) return false
+    return password === secondPassword
+  } 
 
   return (
     <ScrollView style={styles.scrollView}>
+
       <Text style={styles.PageName}>SignUp</Text>
+
       <View style={styles.form}>
+
         <TextInput
           placeholder="Email"
           value={email}
           style={styles.input}
-          onChangeText={() => { }}
+          onChangeText={(txt) => setEmail(txt)}
           keyboardType='email-address'
         />
         <TextInput
           placeholder="Password"
           value={password}
           style={styles.input}
-          onChangeText={() => { }}
+          onChangeText={(txt) => setPassword(txt)}
         />
         <TextInput
           placeholder="Repeat your password"
           value={secondPassword}
           style={styles.input}
-          onChangeText={() => { }}
+          onChangeText={ (txt) => setSecondPassword(txt)}
         />
 
         <TextInput
@@ -37,7 +58,7 @@ const SignUp = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.RectButton}
-          onPress={() => navigation.navigate('SignIn')}
+          onPress={ () => { if( testPassword() ) onSignUpHandler() } }
         >
           <View style={styles.button}>
             <Text style={{ color: 'white' }}>SignUp</Text>

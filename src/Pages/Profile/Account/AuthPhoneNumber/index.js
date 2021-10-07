@@ -10,12 +10,41 @@ import {
     Alert
 } from 'react-native'
 
+import auth from '@react-native-firebase/auth';
+
+import useAuth from '../../../../Hooks/Firebase/useAuth'
 
 import BackScreen from '../../../../../assests/images/global/navigation'
 
 const Account = ({ navigation }) => {
 
     const [sended, setSended] = useState(false)
+
+    const [phoneNumber, setPhoneNumber] = useState('')
+    const [code, setCode] = useState('');
+    const [confirm, setConfirm] = useState(null);
+
+    const userAuth = useAuth()
+
+    if(!userAuth.isSignedIn) return null
+
+    async function verifyPhoneNumber(phoneNumber) {
+        const confirmation = await auth().verifyPhoneNumber(phoneNumber);
+        setConfirm(confirmation);
+    }
+
+    async function confirmCode(confirm, code) {
+        try {
+          const credential = auth.PhoneAuthProvider.credential(confirm.verificationId, code);
+          await auth().currentUser.linkWithCredential(credential);
+        } catch (error) {
+          if (error.code == 'auth/invalid-verification-code') {
+            console.log('Invalid code.');
+          } else {
+            console.log('Account linking error');
+          }
+        }
+    }
 
     return (
         <ScrollView>
@@ -36,26 +65,34 @@ const Account = ({ navigation }) => {
             >
 
                 {
-                    !sended?
+                    !sended ?
                         <TextInput
                             style={styles.TextInput}
                             keyboardType="phone-pad"
                             textContentType="telephoneNumber"
                             placeholder="put your phone number to auth"
+                            value={phoneNumber}
+                            onChangeText={ txt => setPhoneNumber(txt) }
                         />
                         :
                         <TextInput
                             style={styles.TextInput}
                             keyboardType="numeric"
                             placeholder="code"
+                            value={code}
+                            onChangeText={ txt => setCode(txt) }
                         />
                 }
 
                 <TouchableOpacity
-                    onPress={() => {
-                        console.log('send')
-                        Alert.alert('code sent, check yoyr messages')
-                        setSended(true)
+                    onPress={ async () => {
+                        await verifyPhoneNumber(phoneNumber)
+                            .then( () => {
+                                Alert.alert('code sent, check your messages')
+                                setSended(true)
+                                if(sended) confirmCode(confirm, code)
+                            } )
+                            .catch( e => console.log(e) )
                     }}
                 >
                     <Text
