@@ -13,6 +13,7 @@ import SignUp from './Pages/Verification/SignUp'
 
 import Account from './Pages/Profile/Account'
     import EditProfile from './Pages/Profile/Account/EditProfile'
+    import AuthPhoneNumber from './Pages/Profile/Account/AuthPhoneNumber'
 import ChatProfile from './Pages/Profile/ChatProfile';
 
 import Profile from './Pages/Profile'
@@ -38,6 +39,7 @@ const Routes = () => {
 
                 <Screen name="Account" component={Account} />
                     <Screen name="EditProfile" component={EditProfile} />
+                    <Screen name="AuthPhoneNumber" component={AuthPhoneNumber} />
                 <Screen name="ChatProfile" component={ChatProfile} />
             </Navigator>
         </NavigationContainer>

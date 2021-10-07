@@ -40,7 +40,7 @@ const Account = ({ navigation }) => {
                 />
                 <Row
                     name='Verify account with phone number'
-                    onPress={ () => console.log('pressss') }
+                    onPress={ () => navigation.navigate('AuthPhoneNumber') }
                 />
             </Rows>
         </ScrollView>
