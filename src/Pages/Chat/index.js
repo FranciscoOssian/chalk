@@ -133,11 +133,12 @@ const Chat = ({ navigation }) => {
           )
         }
       </ScrollView>
-      <View style={{ width: '100%', height: '11.3%', alignItems: 'center', flexDirection: 'row', justifyContent: 'space-around' }}>
+      <View style={styles.inputMessageContainer}>
         <Audio />
         <TextInput
           style={styles.TextInput}
           placeholder="Aa"
+          multiline={true}
         />
         <Camera />
       </View>
@@ -250,6 +251,15 @@ const styles = StyleSheet.create({
     borderRadius: 18,
 
     width: '71.2%',
-    height: 45
+
+    height: '100%'
+  },
+  inputMessageContainer:{
+    width: '100%',
+    height: 'auto',
+    maxHeight: '50%',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-around'
   }
 })

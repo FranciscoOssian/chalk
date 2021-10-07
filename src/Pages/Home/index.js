@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { Text, View, Image, StyleSheet, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native'
+import { Text, View, Image, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native'
 
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
-import Story from './Components/Story'
+//import Story from './Components/Story'
 import Chat from './Components/Chat'
 
 const storys = []
 
-for (let i = 0; i < 50; ++i) {
-  storys.push({ id: i, picture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg', online: true, name: 'name' })
-}
+//for (let i = 0; i < 50; ++i) {
+//  storys.push({ id: i, picture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg', online: true, name: 'name' })
+//}
 
 const chats = []
 
@@ -62,7 +62,9 @@ const Home = ({ navigation }) => {
           showsHorizontalScrollIndicator={false}
           style={{ marginTop: 7 }}
         >
-          <Story picture="https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg" online={false} name="Your Story" />
+          {
+            true? <></> : <Story picture="https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg" online={false} name="Your Story" />
+          }
           {
             storys.map(story => <Story key={story.id} picture={story.picture} online={story.online} name={story.name} />)
           }
