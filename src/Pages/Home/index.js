@@ -107,10 +107,13 @@ const Home = ({ navigation }) => {
           setModalVisible(!modalVisible);
         }}
       >
-        <Image
-          style={{ width: '100%', height: '100%'}}
-          source={{ uri: modelImageSelected }}
-        />
+        <View style={{width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center'}}>
+          <Image
+            style={{ width: '50%', height: '25%'}}
+            source={{ uri: modelImageSelected }}
+          />
+        </View>
+
       </Modal>
 
     </View>
