@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, Image, StyleSheet, ScrollView } from 'react-native'
+import { Text, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
 
 function formatAMPM(date) {
     var hours = date.getHours();
@@ -24,11 +24,18 @@ const Read = (view) =>
         }
     </View>
 
-const Story = ({ id, picture, name, lastMessage, yourUID }) => {
+const Chat = ({ id, picture, name, lastMessage, yourUID, onPhotoPress }) => {
     return (
         <View style={styles.container}>
             <View style={styles.container2}>
-                <Image style={styles.image} source={{ uri: picture }} />
+                <TouchableOpacity
+                    onPress={()=>{ onPhotoPress() }}
+                >
+                    <Image
+                        style={styles.image}
+                        source={{ uri: picture }}
+                    />
+                </TouchableOpacity>
                 <View style={styles.containerText}>
                     <Text style={styles.name}>{name}</Text>
                     <Text style={styles.content}>
@@ -43,7 +50,7 @@ const Story = ({ id, picture, name, lastMessage, yourUID }) => {
     )
 }
 
-export default Story
+export default Chat
 
 const styles = StyleSheet.create({
     container: {

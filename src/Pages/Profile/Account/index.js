@@ -1,102 +1,91 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, Image, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import {
+    Text,
+    View,
+    Image,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView
+} from 'react-native'
 
 import { launchImageLibrary } from 'react-native-image-picker'
 
-const Pencil = () => {
-    return <Text>✏️</Text>
-}
+import BackScreen from '../../../../assests/images/global/navigation'
+
+import { Row, Rows } from '../../../Components/Rows'
 
 const Account = ({ navigation }) => {
 
-    const [bio, setBio] = useState('')
-    const [name, setName] = useState('')
-    const [photoUri, setPhotoUri] = useState('https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg')
-
-    useEffect(() => {
-        setBio('fkbjrjkrfgkjrgb')
-        setName('eçkgnrlekgn')
-    }, [])
-
-    const onHandleSetPhotoUri = () => {
-        launchImageLibrary({
-            mediaType: 'photo'
-        }, (result) => {
-            if (result.didCancel || result.errorCode) return
-            setPhotoUri(result.assets[0].uri)
-        })
-    }
-
     return (
-        <View>
-            <View style={styles.done}>
-                <Text
-                    style={[styles.doneText, styles.font]}
-                    onPress={() => console.log('done')}
-                >Done</Text>
-            </View>
-            <View style={styles.info}>
+        <ScrollView>
+            <View style={styles.head}>
                 <TouchableOpacity
-                    onPress={onHandleSetPhotoUri}
-                >
-                    <Image
-                        source={{ uri: photoUri }}
-                        style={{ width: 130, height: 130, borderRadius: 100 }}
-                    />
+                    onPress={() => navigation.navigate('Home')}
+                    style={{ margin: 22, marginRight: '90%' }}
+                ><BackScreen />
                 </TouchableOpacity>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Pencil />
-                    <TextInput
-                        onChangeText={(txt) => setName(txt)}
-                        value={name}
-                        style={[styles.name, styles.font]}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Pencil />
-                    <TextInput
-                        onChangeText={(txt) => setBio(txt)}
-                        value={bio}
-                        style={{ marginHorizontal: 20, backgroundColor: 'rgba(255, 255, 255, 0.2)', width: '80%' }}
-                        multiline
-                    />
-                </View>
-
-
+                <Image
+                    source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG' }}
+                    style={{ width: 100, height: 100, borderRadius: 100 }}
+                />
+                <Text style={styles.name}>Jacob</Text>
+                <Text style={styles.age}>20</Text>
+                <Text style={styles.bio}>Hi, my name is Jacob, I like pizza, potato, tomato, sushi.</Text>
             </View>
-            <View style={styles.rows}></View>
-        </View>
+
+            <Rows>
+                <Row
+                    name='Edit profile'
+                    onPress={ () => navigation.navigate('EditProfile') }
+                />
+                <Row
+                    name='Verify account with phone number'
+                    onPress={ () => console.log('pressss') }
+                />
+            </Rows>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    font: {
+    head: {
+        alignItems: 'center',
+    },
+    name: {
         fontFamily: 'Assistant',
         fontStyle: 'normal',
         fontWeight: 'bold',
-    },
-    done: {
-        paddingRight: 30,
-        marginTop: 45,
-
-        flexDirection: 'row',
-        justifyContent: 'flex-end'
-    },
-    doneText: {
-        fontSize: 17,
-        lineHeight: 22,
-        textAlign: 'right',
-        letterSpacing: -0.33,
-    },
-    name: {
-        fontSize: 30,
-        lineHeight: 39,
+        fontSize: 24,
+        lineHeight: 31,
         textAlign: 'center',
         letterSpacing: 0.33,
     },
-    info: {
-        alignItems: 'center',
+    age: {
+        fontFamily: 'Assistant',
+        fontStyle: 'normal',
+        fontWeight: 'normal',
+        fontSize: 24,
+        lineHeight: 31,
+        textAlign: 'center',
+        letterSpacing: -0.2,
+
+        color: 'rgba(0, 0, 0, 0.5)'
+    },
+    bio: {
+        fontFamily: 'Assistant',
+        fontStyle: 'normal',
+        fontWeight: 'normal',
+        fontSize: 15,
+        lineHeight: 20,
+        /* identical to box height */
+
+        textAlign: 'center',
+        letterSpacing: -0.2,
+
+        color: 'rgba(0, 0, 0, 0.5)',
+
+        margin: 40,
+        marginTop: 50,
     }
 })
 

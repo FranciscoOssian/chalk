@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { Text, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import React, { useState } from 'react';
+import { Text, View, Image, StyleSheet, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native'
 
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
@@ -35,11 +35,17 @@ for (let i = 0; i < 70; ++i) {
 }
 
 const Home = ({ navigation }) => {
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modelImageSelected, setModalImageSelected] = useState('');
+
+
   return (
     <View>
+
       <View style={styles.Head}>
         <TouchableOpacity
-          onPress={ () => navigation.navigate('Account') }
+          onPress={() => navigation.navigate('Account')}
         >
           <Image
             style={styles.Perfil}
@@ -48,7 +54,9 @@ const Home = ({ navigation }) => {
         </TouchableOpacity>
         <Text style={styles.HeadText}>Chats</Text>
       </View>
+
       <ScrollView style={{ height: '70%' }}>
+
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -60,7 +68,6 @@ const Home = ({ navigation }) => {
           }
         </ScrollView>
 
-
         {
           chats.map(
             chat =>
@@ -70,22 +77,41 @@ const Home = ({ navigation }) => {
                 picture={chat.picture}
                 name={chat.name}
                 lastMessage={chat.lastMessage}
+                onPhotoPress = { () => {
+                  setModalImageSelected(chat.picture)
+                  setModalVisible(!modalVisible)
+                }}
               />
           )
         }
+
       </ScrollView>
 
       <View style={{ height: 76, width: '100%', backgroundColor: 'blue' }}>
         <Text>AdSense place</Text>
       </View>
-        <View style={{ height: 76, width: '100%', alignItems: 'center' }}>
-          <SearchSvgComponent
-          onPress={ () => navigation.navigate('SearchPerson')}
-            primaryColor="#0584FE"
-            secondaryColor="rgb(255,255,255)"
-          />
-        </View>
+      <View style={{ height: 76, width: '100%', alignItems: 'center' }}>
+        <SearchSvgComponent
+          onPress={() => navigation.navigate('SearchPerson')}
+          primaryColor="#0584FE"
+          secondaryColor="rgb(255,255,255)"
+        />
+      </View>
 
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <Image
+          style={{ width: '100%', height: '100%'}}
+          source={{ uri: modelImageSelected }}
+        />
+      </Modal>
 
     </View>
   )
