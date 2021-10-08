@@ -72,7 +72,11 @@ const Account = ({ navigation }) => {
                             textContentType="telephoneNumber"
                             placeholder="put your phone number to auth"
                             value={phoneNumber}
-                            onChangeText={ txt => setPhoneNumber(txt) }
+                            onChangeText={ txt => {
+                                    if(txt.length === 1 && txt[0] !== '+') setPhoneNumber('+'+txt)
+                                    else setPhoneNumber(txt)
+                                }
+                            }
                         />
                         :
                         <TextInput
@@ -86,11 +90,17 @@ const Account = ({ navigation }) => {
 
                 <TouchableOpacity
                     onPress={ async () => {
+                        Alert.alert('wait...')
+                        setSended(true)
                         await verifyPhoneNumber(phoneNumber)
-                            .then( () => {
+                            .then( async () => {
                                 Alert.alert('code sent, check your messages')
-                                setSended(true)
-                                if(sended) confirmCode(confirm, code)
+                                if(sended) {
+                                    Alert.alert('wait...')
+                                    await confirmCode(confirm, code)
+                                    Alert.alert('confirmed phone!')
+                                    navigation.navigate('Account')
+                                }
                             } )
                             .catch( e => console.log(e) )
                     }}

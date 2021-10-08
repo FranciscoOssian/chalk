@@ -1,7 +1,20 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, StyleSheet, View, TextInput, ScrollView, Button, TouchableOpacity } from 'react-native'
 
+import useAuth from '../../../Hooks/Firebase/useAuth'
+
+import auth from '@react-native-firebase/auth'
+
 const SignIn = ({ navigation }) => {
+
+  const userAuth = useAuth()
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  useEffect( () => {
+    if(userAuth?.user) navigation.navigate('Home')
+  }, [userAuth])
   
   return (
     <ScrollView style={styles.scrollView}>
@@ -10,17 +23,25 @@ const SignIn = ({ navigation }) => {
         <TextInput
           placeholder="Email"
           style={styles.input}
-          onChangeText={() => { }}
+          onChangeText={setEmail}
+          value={email}
         />
         <TextInput
           placeholder="Password"
           style={styles.input}
-          onChangeText={() => { }}
+          onChangeText={setPassword}
+          value={password}
         />
 
         <TouchableOpacity
           style={styles.RectButton}
-          onPress={ () => navigation.navigate('Home') }
+          onPress={ () => {
+            auth().signInWithEmailAndPassword(email, password)
+              .then( () => {
+                navigation.navigate('Home')
+              } )
+              .catch(e => console.log(e))
+          } }
         >
           <View style={styles.button}>
             <Text style={{ color: 'white' }}>SignIn</Text>
