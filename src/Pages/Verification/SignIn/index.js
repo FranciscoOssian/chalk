@@ -4,6 +4,9 @@ import { Text, StyleSheet, View, TextInput, ScrollView, Button, TouchableOpacity
 import useAuth from '../../../Hooks/Firebase/useAuth'
 
 import auth from '@react-native-firebase/auth'
+import firestore from '@react-native-firebase/firestore';
+
+import getRealm from '../../../services/realm'
 
 const SignIn = ({ navigation }) => {
 
@@ -12,10 +15,34 @@ const SignIn = ({ navigation }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  useEffect( () => {
-    if(userAuth?.user) navigation.navigate('Home')
+  useEffect(() => {
+    const run  = async () => {
+      const realm = await getRealm()
+      const myUser = realm.objects("myUser")[0]
+      if (userAuth?.user && myUser) navigation.navigate('Home')
+    }
+    run()
   }, [userAuth])
-  
+
+  const saveUser = async (user) => {
+    const realm = await getRealm()
+    realm.write( () => {
+       realm.create('myUser', user)
+    } )
+  }
+
+  const onHandleSignIn = async (email, password) => {
+    try{
+      const userCredentials = await auth().signInWithEmailAndPassword(email, password)
+      const documentSnapshot = await firestore().collection('Users').doc(userCredentials.user.uid).get()
+      const myData = documentSnapshot.data()
+      await saveUser(myData)
+      console.log(myData)
+    }catch(e){
+      console.log('erorror',e)
+    }
+  }
+
   return (
     <ScrollView style={styles.scrollView}>
       <Text style={styles.PageName}>SignIn</Text>
@@ -35,13 +62,7 @@ const SignIn = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.RectButton}
-          onPress={ () => {
-            auth().signInWithEmailAndPassword(email, password)
-              .then( () => {
-                navigation.navigate('Home')
-              } )
-              .catch(e => console.log(e))
-          } }
+          onPress={() => onHandleSignIn(email, password)}
         >
           <View style={styles.button}>
             <Text style={{ color: 'white' }}>SignIn</Text>

@@ -12,13 +12,30 @@ import {
 import { launchImageLibrary } from 'react-native-image-picker'
 import { Picker } from '@react-native-picker/picker';
 
+import firestore from '@react-native-firebase/firestore'
+
+import getRealm from '../../../../services/realm'
+
+import auth from '@react-native-firebase/auth'
+
 const EditProfile = ({ navigation }) => {
 
-    const [name, setName] = useState('Jacob')
+    const [name, setName] = useState('')
     const [age, setAge] = useState(18)
-    const [bio, setBio] = useState('Hi, my name is Jacob, I like pizza, potato, tomato, sushi.')
+    const [bio, setBio] = useState('')
     const [profileImageUri, setProfileImageUri] = useState('https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG')
 
+    useEffect(() => {
+        const run  = async () => {
+            const realm = await getRealm()
+            const user = await realm.objects('myUser').filtered(`id == '${auth().currentUser.uid}'`)[0]
+            setName(user.name)
+            setAge(user.age)
+            setBio(user.bio)
+            setProfileImageUri(user.profilePicture)
+        }
+        run()
+    }, [])
 
     const onHandleImageChange = () => {
         launchImageLibrary({
@@ -29,11 +46,47 @@ const EditProfile = ({ navigation }) => {
         })
     }
 
+    const editUserInFirebase = async (user) => {
+        firestore().collection('Users').doc(user.id)
+            .set(user)
+    }
+
+    const onHandleDone = async (userRecived) => {
+        const realm = await getRealm()
+        const user = await realm.objects('myUser').filtered(`id == '${userRecived.id}'`)[0]
+        realm.write(() => {
+            user.email = userRecived.email
+            user.name = userRecived.name
+            user.age = userRecived.age
+            user.bio = userRecived.bio
+            user.profilePicture = userRecived.profilePicture
+        });
+        await editUserInFirebase({
+            email: userRecived.email,
+            name: userRecived.name,
+            age: userRecived.age,
+            bio: userRecived.bio,
+            profilePicture: userRecived.profilePicture,
+            id: userRecived.id,
+        })
+    }
+
     return (
         <ScrollView>
             <View style={styles.head}>
                 <TouchableOpacity
-                    onPress={() => navigation.navigate('Account')}
+                    onPress={async () => {
+                        navigation.navigate('Account')
+                        const realm = await getRealm()
+                        onHandleDone({
+                            id: auth().currentUser.uid,
+                            email: auth().currentUser.email,
+                            name: name,
+                            bio: bio,
+                            age: age,
+                            profilePicture: profileImageUri,
+                        })
+                    }}
                     style={{ width: '90%' }}
                 >
                     <Text style={styles.done}>done</Text>
@@ -71,7 +124,7 @@ const EditProfile = ({ navigation }) => {
                         }
                     >
                         {
-                            Array.from({length: 100}, (_, i) => i + 1).map( age => 
+                            Array.from({ length: 100 }, (_, i) => i + 1).map(age =>
                                 <Picker.Item
                                     label={`${age}`}
                                     value={age}

@@ -4,27 +4,59 @@ import { Text, StyleSheet, View, TextInput, ScrollView, TouchableOpacity } from 
 import auth from '@react-native-firebase/auth'
 import useAuth from '../../../Hooks/Firebase/useAuth'
 
+import getRealm from '../../../services/realm'
+
+import firestore from '@react-native-firebase/firestore';
+
 const SignUp = ({ navigation }) => {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [secondPassword, setSecondPassword] = useState('')
 
-  useEffect( ()=>{
-    auth().onAuthStateChanged( user => {
-      if (user) navigation.navigate('Home')
-      console.log(user)
-    })
-  },[])
+  const userAuth = useAuth()
 
-  const onSignUpHandler = async () => {
-    await auth().createUserWithEmailAndPassword(email, password)
-  }
+  useEffect(() => {
+    const run = async () => {
+      const realm = await getRealm()
+      const myUser = realm.objects("myUser")[0]
+      if (userAuth?.user && myUser) navigation.navigate('Home')
+    }
+    run()
+  }, [userAuth])
 
   const testPassword = () => {
-    if( password === '' && secondPassword === '' ) return false
+    if (password === '' && secondPassword === '') return false
     return password === secondPassword
-  } 
+  }
+
+  const saveUser = async (user) => {
+    const realm = await getRealm()
+    realm.write(() => {
+      realm.create('myUser', user)
+    })
+  }
+
+  const onHandleSignUp = async (email, password) => {
+    try{
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password)
+      navigation.navigate('Home')
+      const data = {
+        name: 'Anon',
+        age: 18,
+        email: email,
+        id: userCredential.user.uid,
+        bio: '',
+        profilePicture: ''
+      }
+      await saveUser(data)
+      await firestore().collection('Users').doc(userCredential.user.uid).set(data)
+    }
+    catch(e){
+      console.log(e)
+    }
+
+  }
 
   return (
     <ScrollView style={styles.scrollView}>
@@ -50,7 +82,7 @@ const SignUp = ({ navigation }) => {
           placeholder="Repeat your password"
           value={secondPassword}
           style={styles.input}
-          onChangeText={ (txt) => setSecondPassword(txt)}
+          onChangeText={(txt) => setSecondPassword(txt)}
         />
 
         <TextInput
@@ -58,7 +90,7 @@ const SignUp = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.RectButton}
-          onPress={ () => { if( testPassword() ) onSignUpHandler() } }
+          onPress={() => { if (testPassword()) onHandleSignUp(email, password) }}
         >
           <View style={styles.button}>
             <Text style={{ color: 'white' }}>SignUp</Text>
