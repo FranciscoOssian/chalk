@@ -25,7 +25,6 @@ const Read = (view) =>
     </View>
 
 const Chat = ({ id, picture, name, lastMessage, yourUID, onPhotoPress, onChatPress }) => {
-    console.log(lastMessage)
     return (
         <View style={styles.container}>
             <View style={styles.container2}>

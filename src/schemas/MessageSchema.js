@@ -5,7 +5,7 @@ const messageSchema = {
         id: { type: 'string', indexed: true },
         from: 'User',
         to: 'User',
-        timestamp: 'string',
+        timestamp: 'date',
         content:'ContentMessage',
     }
 }

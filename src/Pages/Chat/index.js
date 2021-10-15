@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Text,
   View,
@@ -13,6 +13,8 @@ import {
 import RNFetchBlob from 'rn-fetch-blob'
 import { launchImageLibrary } from 'react-native-image-picker';
 import auth from '@react-native-firebase/auth'
+import database from '@react-native-firebase/database'
+import { sha256 } from 'react-native-sha256';
 
 import getRealm from '../../services/realm';
 
@@ -56,11 +58,20 @@ for (let i = 0; i < 100; ++i) {
 
 const Chat = ({ route, navigation }) => {
 
-  const { friend, chatName } = route.params;
+  const scrollViewRef = useRef();
+
+  const { friendID, chatName } = route.params;
+
+  const [friend, setFriend] = useState({
+    profilePicture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg'
+  });
+
   const [myUser, setMyUser] = useState({
     profilePicture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg'
   })
+
   const [messages, setMessages] = useState([])
+
   const [inputMessage, setInputMessage] = useState({
       type:'',
       value:''
@@ -68,25 +79,51 @@ const Chat = ({ route, navigation }) => {
 
   useEffect(() => {
     const run  = async () => {
+      const chatName = [auth().currentUser.uid, friendID].sort().join('-')
       const realm = await getRealm()
-      const user = realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
-      console.log(user)
-      setMyUser(user)
+      setMyUser( realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]  )
+      setFriend( realm.objects('User').filtered(`id == '${friendID}'`)[0]                )
+      const messages = realm.objects('Chat').filtered(`id == '${chatName}'`)[0].messages
+      setMessages( messages )
     }
     run()
   }, [])
 
   const onHandleMessageSend = async (message) => {
     const realm = await getRealm()
-
-    const me = realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
-
-
+    const sha = await sha256(`${JSON.stringify(message)}`)
+    const chatName = [auth().currentUser.uid, friendID].sort().join('-')
+    
     realm.write(  () => {
-      realm.create('Message', {
-        from: me,
-        to: friend.id
+      realm.create('ContentMessage', {
+        id: sha,
+        contentType: message.type,
+        value: message.value
       })
+      const date = new Date()
+      const content = realm.objects('ContentMessage').filtered(`id == '${sha}'`)[0]
+      realm.create('Message', {
+        id: sha,
+        from: myUser,
+        to: friend,
+        content: content,
+        timestamp: date
+      })
+      const newMessage = realm.objects('Message').filtered(`id == '${sha}'`)[0]
+      const chat = realm.objects('Chat').filtered(`id == '${chatName}'`)[0]
+      chat.messages = [...chat.messages, newMessage]
+      database().ref(`chats/${chatName}/queues/${friendID}`).once('value')
+      .then(snapshot => {
+        const prev = snapshot.val()? snapshot.val() : []
+        console.log(prev, chatName, friendID)
+        database().ref(`chats/${chatName}/queues/${friendID}`).set([...prev, {
+          content:{
+            type: content.contentType,
+            value: content.value,
+          },
+          timestamp: date.getDate(),
+        }])
+      });
     })
   }
 
@@ -123,7 +160,11 @@ const Chat = ({ route, navigation }) => {
 
       </View>
       
-      <ScrollView style={styles.scrollView}>
+      <ScrollView 
+        style={styles.scrollView}
+        ref={scrollViewRef}
+        onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: false })}
+      >
 
         <View style={styles.startChat}>
           <Image
@@ -160,7 +201,7 @@ const Chat = ({ route, navigation }) => {
                       from={message.from}
                       timestamp={message.timestamp}
                       content={message.content}
-                      profilePicture={message.profilePicture}
+                      profilePicture={message.from.profilePicture}
                       yourUID={myUser.id}
                     />
                   </TouchableOpacity>
@@ -174,13 +215,20 @@ const Chat = ({ route, navigation }) => {
       </ScrollView>
       <View style={styles.inputMessageContainer}>
         <Audio />
+        <Camera />
         <TextInput
           style={styles.TextInput}
           placeholder="Aa"
           multiline={true}
           onChangeText={ (txt) => setInputMessage({ type:'message', value: txt }) }
+          value={inputMessage.value}
         />
-        <Camera />
+        <BackScreen
+          onPress={ async () => {
+            await onHandleMessageSend(inputMessage)
+            setInputMessage({ type:'', value:'' })
+          } }
+        />
       </View>
     </>
 
@@ -300,6 +348,8 @@ const styles = StyleSheet.create({
     maxHeight: '50%',
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'space-around'
+    justifyContent: 'space-around',
+
+    paddingHorizontal: 20
   }
 })

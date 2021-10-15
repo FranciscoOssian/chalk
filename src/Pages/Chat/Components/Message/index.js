@@ -3,7 +3,7 @@ import { Text, View, Image, StyleSheet, ScrollView } from 'react-native'
 
 const MyMessage = ({ content, profilePicture }) => {
 
-    const isImageContent = content?.type === 'image' ? true : false
+    const isImageContent = content.type === 'image' ? true : false
 
     return (
         <View style={[styles.message, { justifyContent: 'flex-end' }]}>
@@ -11,11 +11,11 @@ const MyMessage = ({ content, profilePicture }) => {
                 {
                     isImageContent ?
                         <Image
-                            source={{ uri: content.uri }}
+                            source={{ uri: content.value }}
                             style={{width: '100%', height: 150}}
                         />
                         :
-                        <Text>{content}</Text>
+                        <Text>{content.value}</Text>
                 }
             </View>
             <Image
@@ -28,7 +28,7 @@ const MyMessage = ({ content, profilePicture }) => {
 
 const FriendMessage = ({ content, profilePicture }) => {
 
-    const isImageContent = content?.type === 'image' ? true : false
+    const isImageContent = content.type === 'image' ? true : false
 
     return (
         <View style={[styles.message]}>
@@ -40,11 +40,11 @@ const FriendMessage = ({ content, profilePicture }) => {
                 {
                     isImageContent ?
                         <Image
-                            source={{ uri: content.uri }}
+                            source={{ uri: content.value }}
                             style={{width: '100%', height: 150}}
                         />
                         :
-                        <Text>{content}</Text>
+                        <Text>{content.value}</Text>
                 }
             </View>
         </View>
@@ -53,7 +53,7 @@ const FriendMessage = ({ content, profilePicture }) => {
 
 const Message = ({ content, profilePicture, timestamp, from, yourUID }) => {
 
-    const yourMessage = from === yourUID
+    const yourMessage = from.id === yourUID
 
     return (
         <View style={styles.container}>

@@ -3,7 +3,7 @@ const contentMessageSchema = {
     primaryKey: 'id',
     properties: {
         id: { type: 'string', indexed: true },
-        type: 'string',
+        contentType: 'string',
         value: 'string'
     }
 }
