@@ -17,10 +17,8 @@ const SignUp = ({ navigation }) => {
   const userAuth = useAuth()
 
   useEffect(() => {
-    const run = async () => {
-      const realm = await getRealm()
-      const myUser = realm.objects("myUser")[0]
-      if (userAuth?.user && myUser) navigation.navigate('Home')
+    const run  = async () => {
+      if (userAuth?.user && userAuth.isSignedIn) navigation.navigate('Home')
     }
     run()
   }, [userAuth])
@@ -33,7 +31,7 @@ const SignUp = ({ navigation }) => {
   const saveUser = async (user) => {
     const realm = await getRealm()
     realm.write(() => {
-      realm.create('myUser', user)
+      realm.create('User', user)
     })
   }
 

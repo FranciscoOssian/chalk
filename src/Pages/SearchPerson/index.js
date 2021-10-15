@@ -1,9 +1,68 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text, ImageBackground, StyleSheet, Image, View } from 'react-native'
+
+import { io } from "socket.io-client"
+import firestore from '@react-native-firebase/firestore';
+import database from '@react-native-firebase/database';
+import auth from '@react-native-firebase/auth';
+
+import getRealm from '../../services/realm';
 
 import StopSearch from '../../../assests/images/pages/SearchPerson/Stop'
 
+
 const SearchPeron = ({ navigation }) => {
+  
+  useEffect(() => {
+    const socket = io("https://chatalk-matching-system.herokuapp.com/");
+    socket.on('connect', () => {
+      console.log('your id is', socket.id)
+
+      socket.on("match", async userMatched => {
+        
+        const realm = await getRealm()
+        const users = realm.objects('User')
+
+        const chatName = [auth().currentUser.uid, userMatched.user.id].sort().join('-')
+
+        const friendInDb = users.filtered(`id == '${userMatched.user.id}'`)[0]
+
+        if( !friendInDb ){
+          
+          const userSnapshot = await firestore().collection('Users').doc(userMatched.user.id).get();
+          const user = userSnapshot.data()
+          
+          realm.write( () => {
+            
+            realm.create('User', {
+              ...user,
+              age: parseInt(user.age)
+            } )
+
+            const me = users.filtered(`id == '${auth().currentUser.uid}'`)[0]
+            const friend = users.filtered(`id == '${user.id}'`)[0]
+            
+            realm.create('Chat', {
+              id: chatName,
+              owners: [ me, friend ],
+              messages: []
+            })
+
+            navigation.navigate('Chat', { friend: user, chatName})
+  
+          })
+        }
+        else{
+          const chat = realm.objects('Chat').filtered(`id == '${chatName}'`)[0]
+          navigation.navigate('Chat', { friend: friendInDb, chatName})
+        }
+      })
+
+      socket.emit('add_user', {
+        id: auth().currentUser.uid
+      })
+    })
+  }, [])
 
   return (
     <ImageBackground
@@ -13,7 +72,7 @@ const SearchPeron = ({ navigation }) => {
       opacity={0.8}
     >
 
-      <Text onPress={ () => navigation.navigate('Chat') } style={[styles.subTitle, { textDecorationLine: 'underline' }]}>How works the matching?</Text>
+      <Text onPress={() => navigation.navigate('Chat')} style={[styles.subTitle, { textDecorationLine: 'underline' }]}>How works the matching?</Text>
 
 
       <View style={styles.container}>
@@ -28,8 +87,8 @@ const SearchPeron = ({ navigation }) => {
       </View>
 
 
-    <View><StopSearch onPress={ () => {} } /></View>
-      
+      <View><StopSearch onPress={() => { }} /></View>
+
 
     </ImageBackground>
   );
@@ -66,7 +125,7 @@ const styles = StyleSheet.create({
 
     color: '#FFFFFF'
   },
-  container:{
+  container: {
     alignItems: 'center'
   }
 })

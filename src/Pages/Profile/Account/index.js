@@ -10,11 +10,33 @@ import {
 
 import { launchImageLibrary } from 'react-native-image-picker'
 
+import getRealm from '../.././../services/realm'
+
 import BackScreen from '../../../../assests/images/global/navigation'
 
 import { Row, Rows } from '../../../Components/Rows'
 
+import auth from '@react-native-firebase/auth'
+
 const Account = ({ navigation }) => {
+
+    const [name, setName] = useState('')
+    const [age, setAge] = useState(18)
+    const [bio, setBio] = useState('')
+    const [profileImageUri, setProfileImageUri] = useState('https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG')
+
+    useEffect(() => {
+        const run = async () => {
+            const realm = await getRealm()
+            const user = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+            console.log(user)
+            setName(user.name)
+            setAge(user.age)
+            setBio(user.bio)
+            setProfileImageUri(user.profilePicture)
+        }
+        run()
+    },[])
 
     return (
         <ScrollView>
@@ -25,12 +47,12 @@ const Account = ({ navigation }) => {
                 ><BackScreen />
                 </TouchableOpacity>
                 <Image
-                    source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG' }}
+                    source={{ uri: profileImageUri }}
                     style={{ width: 100, height: 100, borderRadius: 100 }}
                 />
-                <Text style={styles.name}>Jacob</Text>
-                <Text style={styles.age}>20</Text>
-                <Text style={styles.bio}>Hi, my name is Jacob, I like pizza, potato, tomato, sushi.</Text>
+                <Text style={styles.name}>{name}</Text>
+                <Text style={styles.age}>{age}</Text>
+                <Text style={styles.bio}>{bio}</Text>
             </View>
 
             <Rows>

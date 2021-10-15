@@ -24,7 +24,8 @@ const Read = (view) =>
         }
     </View>
 
-const Chat = ({ id, picture, name, lastMessage, yourUID, onPhotoPress }) => {
+const Chat = ({ id, picture, name, lastMessage, yourUID, onPhotoPress, onChatPress }) => {
+    console.log(lastMessage)
     return (
         <View style={styles.container}>
             <View style={styles.container2}>
@@ -36,14 +37,18 @@ const Chat = ({ id, picture, name, lastMessage, yourUID, onPhotoPress }) => {
                         source={{ uri: picture }}
                     />
                 </TouchableOpacity>
-                <View style={styles.containerText}>
+                
+                <TouchableOpacity
+                    style={styles.containerText}
+                    onPress={() => onChatPress() }
+                >
                     <Text style={styles.name}>{name}</Text>
                     <Text style={styles.content}>
-                        {lastMessage.senderUID === yourUID ? 'you:' : ''}
-                        {`${lastMessage.content.substring(0, 19)}${lastMessage.content.length > 19 ? '...' : ''}`}
+                        {lastMessage.id === yourUID ? 'you:' : ''}
+                        {`${lastMessage.content.value.substring(0, 19)}${lastMessage.content.value.length > 19 ? '...' : ''}`}
                         {`   •   ${formatAMPM(lastMessage.timestamp)}`}
                     </Text>
-                </View>
+                </TouchableOpacity>
             </View>
             <Read view={lastMessage.view} />
         </View>
@@ -74,9 +79,8 @@ const styles = StyleSheet.create({
         borderRadius: 100,
     },
     containerText: {
-        aspectRatio: 236 / 42,
         justifyContent: 'center',
-        paddingLeft: 10
+        paddingLeft: 10,
     },
     name: {
         fontFamily: 'Assistant',

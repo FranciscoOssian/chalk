@@ -17,9 +17,7 @@ const SignIn = ({ navigation }) => {
 
   useEffect(() => {
     const run  = async () => {
-      const realm = await getRealm()
-      const myUser = realm.objects("myUser")[0]
-      if (userAuth?.user && myUser) navigation.navigate('Home')
+      if (userAuth?.user && userAuth.isSignedIn) navigation.navigate('Home')
     }
     run()
   }, [userAuth])
@@ -27,7 +25,7 @@ const SignIn = ({ navigation }) => {
   const saveUser = async (user) => {
     const realm = await getRealm()
     realm.write( () => {
-       realm.create('myUser', user)
+       realm.create('User', user)
     } )
   }
 
@@ -36,6 +34,7 @@ const SignIn = ({ navigation }) => {
       const userCredentials = await auth().signInWithEmailAndPassword(email, password)
       const documentSnapshot = await firestore().collection('Users').doc(userCredentials.user.uid).get()
       const myData = documentSnapshot.data()
+      console.log(myData)
       await saveUser(myData)
       console.log(myData)
     }catch(e){

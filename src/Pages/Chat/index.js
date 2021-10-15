@@ -9,8 +9,12 @@ import {
   TouchableOpacity,
   Alert
 } from 'react-native'
+
 import RNFetchBlob from 'rn-fetch-blob'
 import { launchImageLibrary } from 'react-native-image-picker';
+import auth from '@react-native-firebase/auth'
+
+import getRealm from '../../services/realm';
 
 import BackScreen from '../../../assests/images/global/navigation'
 import VideoCall from '../../../assests/images/global/videoCall'
@@ -50,7 +54,41 @@ for (let i = 0; i < 100; ++i) {
   })
 }
 
-const Chat = ({ navigation }) => {
+const Chat = ({ route, navigation }) => {
+
+  const { friend, chatName } = route.params;
+  const [myUser, setMyUser] = useState({
+    profilePicture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg'
+  })
+  const [messages, setMessages] = useState([])
+  const [inputMessage, setInputMessage] = useState({
+      type:'',
+      value:''
+  })
+
+  useEffect(() => {
+    const run  = async () => {
+      const realm = await getRealm()
+      const user = realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+      console.log(user)
+      setMyUser(user)
+    }
+    run()
+  }, [])
+
+  const onHandleMessageSend = async (message) => {
+    const realm = await getRealm()
+
+    const me = realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+
+
+    realm.write(  () => {
+      realm.create('Message', {
+        from: me,
+        to: friend.id
+      })
+    })
+  }
 
   return (
     <>
@@ -68,11 +106,11 @@ const Chat = ({ navigation }) => {
             style={styles.content}
           >
             <Image
-              source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
+              source={{ uri: friend.profilePicture }}
               style={{ width: 45, height: 45, borderRadius: 100 }}
             />
             <View>
-              <Text style={[styles.name, styles.font]}>Name</Text>
+              <Text style={[styles.name, styles.font]}>{friend.name}</Text>
               <Text style={[styles.status, styles.font]}>Online</Text>
             </View>
           </View>
@@ -89,46 +127,47 @@ const Chat = ({ navigation }) => {
 
         <View style={styles.startChat}>
           <Image
-            source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
+            source={{ uri: myUser.profilePicture }}
             style={{ width: 100, height: 100, borderRadius: 100 }}
           />
-          <Text style={[styles.startChatPersonName, styles.fontfont]}>Jacob</Text>
+          <Text style={[styles.startChatPersonName, styles.fontfont]}>{myUser.name}</Text>
           <Text style={[styles.startChatDescription, styles.font]}>You’re on Chat</Text>
           <View style={styles.newFriend}>
             <View style={styles.imageDuo}>
               <Image
-                source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
+                source={{ uri: friend.profilePicture }}
                 style={[styles.imageDuoImage, { left: 7.5 }]}
               />
               <Image
-                source={{ uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' }}
+                source={{ uri: myUser.profilePicture }}
                 style={[styles.imageDuoImage, { left: -7.5 }]}
               />
             </View>
-            <Text style={styles.newFriendMessage}>Say hi to your new  friend, Jacob.</Text>
+            <Text style={styles.newFriendMessage}>Say hi to your new  friend, {friend.name}.</Text>
           </View>
         </View>
         {
-          chat.messages.map((message, index, e) => {
-            const useSpace = chat.messages[index].from != chat.messages[index + 1]?.from
-            return (
-              <View key={message.id}>
-                <TouchableOpacity
-                  onPress={() => message.content?.type === 'image' ? Alert.alert('img') : console.log('text')}
-                  activeOpacity={0.6}
-                >
-                  <Message
-                    from={message.from}
-                    timestamp={message.timestamp}
-                    content={message.content}
-                    profilePicture={message.profilePicture}
-                    yourUID='ddd'
-                  />
-                </TouchableOpacity>
-                {useSpace ? <View style={{ width: '100%', height: 30 }}></View> : <></>}
-              </View>
-            )
-          }
+          messages.map(
+            (message, index, e) => {
+              const useSpace = messages[index].from != messages[index + 1]?.from
+              return (
+                <View key={message.id}>
+                  <TouchableOpacity
+                    onPress={() => message.content.type === 'image' ? Alert.alert('img') : console.log('text')}
+                    activeOpacity={0.6}
+                  >
+                    <Message
+                      from={message.from}
+                      timestamp={message.timestamp}
+                      content={message.content}
+                      profilePicture={message.profilePicture}
+                      yourUID={myUser.id}
+                    />
+                  </TouchableOpacity>
+                  {useSpace ? <View style={{ width: '100%', height: 30 }}></View> : <></>}
+                </View>
+              )
+            }
 
           )
         }
@@ -139,6 +178,7 @@ const Chat = ({ navigation }) => {
           style={styles.TextInput}
           placeholder="Aa"
           multiline={true}
+          onChangeText={ (txt) => setInputMessage({ type:'message', value: txt }) }
         />
         <Camera />
       </View>

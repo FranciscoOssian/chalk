@@ -3,12 +3,10 @@ const messageSchema = {
     primaryKey: 'id',
     properties: {
         id: { type: 'string', indexed: true },
-        from: 'string',
+        from: 'User',
+        to: 'User',
         timestamp: 'string',
-        content: {
-            type: 'string',
-            value: 'string'
-        }
+        content:'ContentMessage',
     }
 }
 

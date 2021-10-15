@@ -28,7 +28,7 @@ const EditProfile = ({ navigation }) => {
     useEffect(() => {
         const run  = async () => {
             const realm = await getRealm()
-            const user = await realm.objects('myUser').filtered(`id == '${auth().currentUser.uid}'`)[0]
+            const user = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
             setName(user.name)
             setAge(user.age)
             setBio(user.bio)
@@ -53,7 +53,7 @@ const EditProfile = ({ navigation }) => {
 
     const onHandleDone = async (userRecived) => {
         const realm = await getRealm()
-        const user = await realm.objects('myUser').filtered(`id == '${userRecived.id}'`)[0]
+        const user = await realm.objects('User').filtered(`id == '${userRecived.id}'`)[0]
         realm.write(() => {
             user.email = userRecived.email
             user.name = userRecived.name

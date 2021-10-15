@@ -1,72 +1,108 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, Image, StyleSheet, ScrollView, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native'
+import {
+  Text,
+  View,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  TouchableWithoutFeedback
+} from 'react-native'
+
+import auth from '@react-native-firebase/auth'
+import database from '@react-native-firebase/database'
+import { sha256 } from 'react-native-sha256';
+
+import getRealm from '../../services/realm'
+
+import Chat from './Components/Chat'
+import Story from './Components/Story'
 
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
-import Story from './Components/Story'
-import Chat from './Components/Chat'
-
-import useArray from '../../Hooks/useArray'
-
-
-
-//const storys = []
-
-//for (let i = 0; i < 50; ++i) {
-//  storys.push({ id: i, picture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg', online: true, name: 'name' })
-//}
+let unsubs = []
 
 const chats = []
-
-//function randomDate(start, end) {
-//  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-//}
-
-//for (let i = 0; i < 70; ++i) {
-//  chats.push(
-//    {
-//      id: i,
-//      picture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg',
-//      name: `nameP${i}`,
-//      lastMessage: {
-//        content: `👍👍👍👍👍👍👍👍👍hkoooolklk👍👍👍kk ${parseInt(Math.random() * 100)} oi`,
-//        timestamp: randomDate(new Date(2012, 0, 1), new Date()),
-//        view: true,
-//        senderUID: 'ddd'
-//      }
-//    }
-//  )
-//}
-
-import getRealm from '../../services/realm'
 
 const Home = ({ navigation }) => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modelImageSelected, setModalImageSelected] = useState('');
 
-  const [chats, setChats] = useState([
-    {
-      id: 225,
-      picture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg',
-      name: 'lerfhl',
-      lastMessage: {
-        content: `👍👍👍👍👍👍👍👍👍hkoooolklk👍👍👍kk  oi`,
-        timestamp: new Date(),
-        view: true,
-        senderUID: 'ddd'
-      }
-    }
-  ])
+  const [myProfilePicture, setMyProfilePicture] = useState('https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG')
+
+  const [chats, setChats] = useState([])
 
   useEffect(() => {
-    const run  = async () => {
+    const run = async () => {
       const realm = await getRealm()
-      const myUser = realm.objects("myUser")
-      console.log(myUser)
+      const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+      setMyProfilePicture(me.profilePicture)
+
+      const chts = realm.objects('Chat')
+      setChats(chts)
+      console.log('ddddddddddddddddddddddddddddddddd',chts[0].messages)
+      const messages = realm.objects('Message')
+      const users = realm.objects('User')
+
+      realm.write(async () => {
+
+        for (let chat of chats) {
+
+          const sorted = [
+            chat.owners[0].id,
+            chat.owners[1].id
+          ].sort().join('-')
+
+          const friendId = sorted.replace(auth().currentUser.uid, '').replace('-', '')
+          console.log(friendId)
+
+          const friend = realm.objects('User').filtered(`id == '${friendId}'`)
+
+          unsubs.push(
+            database()
+              .ref(`chats/${sorted}/queues/${auth().currentUser.uid}`)
+              .on('value', async snapshot => {
+                database().ref(`chats/${sorted}/queues/${auth().currentUser.uid}`).set([])
+                  .then(() => console.log('Data set.'));
+                if (!snapshot.val()) return
+                for (msg of snapshot.val()) {
+                  realm.create('contentMessage', {
+                    id: await sha256(`${JSON.stringify(msg)}`),
+                    type: msg.content.type,
+                    value: msg.content.value
+                  })
+                  const content = realm.objects('contentMessage').filtered(`id == '${sha256(`${JSON.stringify(msg)}`)}'`)[0]
+                  realm.create('Message', {
+                    from: friend,
+                    to: me,
+                    timestamp: msg.timestamp,
+                    content: content
+                  })
+                }
+              })
+          )
+
+        }
+
+      })
+
+
     }
+
     run()
+
+    return () => {
+      for (let unsub of unsubs) {
+        console.log(unsub)
+        unsub()
+      }
+      unsubs = []
+    }
+
   }, [])
+
 
   return (
     <View>
@@ -77,7 +113,7 @@ const Home = ({ navigation }) => {
         >
           <Image
             style={styles.Perfil}
-            source={{ uri: "https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg" }}
+            source={{ uri: myProfilePicture }}
           />
         </TouchableOpacity>
         <Text style={styles.HeadText}>Chats</Text>
@@ -91,7 +127,7 @@ const Home = ({ navigation }) => {
           style={{ marginTop: 7 }}
         >
           {
-            true? <></> : <Story picture="https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg" online={false} name="Your Story" />
+            true ? <></> : <Story picture="https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg" online={false} name="Your Story" />
           }
           {
             [].map(story => <Story key={story.id} picture={story.picture} online={story.online} name={story.name} />)
@@ -100,18 +136,33 @@ const Home = ({ navigation }) => {
 
         {
           chats.map(
-            chat =>
-              <Chat
-                yourUID='ddd'
-                key={chat.id}
-                picture={chat.picture}
-                name={chat.name}
-                lastMessage={chat.lastMessage}
-                onPhotoPress = { () => {
-                  setModalImageSelected(chat.picture)
-                  setModalVisible(!modalVisible)
-                }}
-              />
+            chat => {
+              console.log("cgat",chat)
+              const friend = chat.owners.filter( user => user.id !== auth().currentUser.uid )[0]
+              return (
+                <Chat
+                  yourUID={auth().currentUser.uid}
+                  key={chat.id}
+                  picture={
+                    friend.profilePicture
+                  }
+                  name={
+                    friend.name
+                  }
+                  lastMessage={
+                    { id:'', timestamp: new Date(2012, 0, 1), content: { type: 'message', value:`                   ` } } 
+                  }
+                  onPhotoPress={() => {
+                    setModalImageSelected(chat.picture)
+                    setModalVisible(!modalVisible)
+                  }}
+                  onChatPress={ async () => {
+                    navigation.navigate('Chat', { friend: friend, chatName: [auth().currentUser.uid, friend.id].sort().join('-') })
+                  }}
+                />
+              )
+            }
+
           )
         }
 
@@ -145,7 +196,7 @@ const Home = ({ navigation }) => {
         >
           <TouchableWithoutFeedback>
             <Image
-              style={{ width: '100%', height: '50%'}}
+              style={{ width: '100%', height: '50%' }}
               source={{ uri: modelImageSelected }}
             />
           </TouchableWithoutFeedback>
@@ -177,7 +228,7 @@ const styles = StyleSheet.create({
     fontFamily: "Assistant",
     fontStyle: 'normal'
   },
-  modalContainer:{
+  modalContainer: {
     width: '100%',
     height: '100%',
     alignItems: 'center',
