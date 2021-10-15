@@ -50,7 +50,7 @@ const Home = ({ navigation }) => {
       } catch (e) { console.log(e) }
       
 
-      /*if ( (await AsyncStorage.getItem('firstTimeOpenApp')) === null ) {*/if (true) {
+      if ( (await AsyncStorage.getItem('firstTimeOpenApp')) === null ) {
 
         console.log('entrou')
         const snapshot = await firestore().collection('Users').doc(`${me.id}`).collection('friends').doc('friends').get()
@@ -116,7 +116,7 @@ const Home = ({ navigation }) => {
         setChats(realm.objects('Chat'))
       }
 
-      //await AsyncStorage.setItem('firstTimeOpenApp', null)
+      await AsyncStorage.setItem('firstTimeOpenApp', 'false')
 
 
       realm.write(async () => {
