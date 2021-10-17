@@ -64,6 +64,12 @@ const Account = ({ navigation }) => {
                     name='Verify account with phone number'
                     onPress={ () => navigation.navigate('AuthPhoneNumber') }
                 />
+                <Row
+                    name='LogOut Account'
+                    onPress={ () => {
+                        auth().signOut().then(() => navigation.navigate('SignUp') );
+                    }}
+                />
             </Rows>
         </ScrollView>
     );

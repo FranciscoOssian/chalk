@@ -12,7 +12,6 @@ import {
 
 import auth from '@react-native-firebase/auth'
 import database from '@react-native-firebase/database'
-import firestore from '@react-native-firebase/firestore'
 import { sha256 } from 'react-native-sha256';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -23,9 +22,9 @@ import Story from './Components/Story'
 
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
-let unsubs = []
+import firstTimeOpenApp from './utils/firstTimeOpenApp'
 
-const chats = []
+let unsubs = []
 
 const Home = ({ navigation }) => {
 
@@ -33,94 +32,28 @@ const Home = ({ navigation }) => {
   const [modelImageSelected, setModalImageSelected] = useState('');
 
   const [myProfilePicture, setMyProfilePicture] = useState('https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG')
-
   const [chats, setChats] = useState([])
-
   const [flag, setFlag] = useState(false)
-  useEffect(() => {
 
+  useEffect(() => {
+    
     const run = async () => {
       const realm = await getRealm()
       const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
-
-      if(!me) return setFlag(!flag)
-
+      
+      if (!me) return setFlag(!flag)
+      
       try {
         setMyProfilePicture(me.profilePicture)
       } catch (e) { console.log(e) }
       
-
-      if ( (await AsyncStorage.getItem('firstTimeOpenApp')) === null ) {
-
-        console.log('entrou')
-        const snapshot = await firestore().collection('Users').doc(`${me.id}`).collection('friends').doc('friends').get()
-        const friends = snapshot.data()?.friends
-
-        for (let friendID of friends) {
-          const friendSnapShot = await firestore().collection('Users').doc(`${friendID}`).get()
-          const friend = friendSnapShot.data()
-
-          const chatName = [friend.id, me.id].sort().join('-')
-
-          const queuedMessagesSnapShot = await database().ref(`chats/${chatName}/queues/${me.id}`).once('value')
-          
-          realm.write(() => {
-            try {
-              realm.create('User', {
-                name: friend.name,
-                age: friend.age,
-                email: friend.email,
-                bio: friend.bio,
-                profilePicture: friend.profilePicture,
-                id: friend.id
-              })
-              const realmFriend = realm.objects('User').filtered(`id == '${friendID}'`)[0]
-              realm.create('Chat', {
-                id: chatName,
-                owners: [realmFriend, me],
-                messages: []
-              })
-            } catch (e) { console.log(e) }
-          })
-          
-          const realmChat = realm.objects('Chat').filtered(`id == '${chatName}'`)[0]
-          let queue = queuedMessagesSnapShot.val() === null ? [] : queuedMessagesSnapShot.val()
-          if(!Array.isArray(queue)) queue = [queue]
-          const realmFriend = realm.objects('User').filtered(`id == '${friendID}'`)[0]
-
-          for (let msg of queue) {
-            const sha = await sha256(`${JSON.stringify(msg)}`)
-            console.log("msg", msg, sha)
-            realm.write(() => {
-              try {
-                realm.create('ContentMessage', {
-                  id: sha,
-                  contentType: msg.content.type,
-                  value: msg.content.value
-                })
-                const realmContentMessage = realm.objects('ContentMessage').filtered(`id == '${sha}'`)[0]
-                realm.create('Message', {
-                  id: sha,
-                  timestamp: new Date(parseInt(msg.timestamp)),
-                  to: me,
-                  from: realmFriend,
-                  content: realmContentMessage
-                })
-                const newMessage = realm.objects('Message').filtered(`id == '${sha}'`)[0]
-                realmChat.messages = [...realmChat.messages, newMessage]
-              } catch (e) { console.log(e) }
-            })
-          }
-          await database().ref(`chats/${chatName}/queues/${me.id}`).set([])
-        }
-        setChats(realm.objects('Chat'))
-      }
+      if ((await AsyncStorage.getItem('firstTimeOpenApp')) !== 'false') await firstTimeOpenApp()
+      
+      setChats(realm.objects('Chat'))
 
       await AsyncStorage.setItem('firstTimeOpenApp', 'false')
 
-
       realm.write(async () => {
-
         for (let chat of chats) {
 
           const sorted = [
@@ -129,40 +62,33 @@ const Home = ({ navigation }) => {
           ].sort().join('-')
 
           const friendId = sorted.replace(auth().currentUser.uid, '').replace('-', '')
-          console.log(friendId)
-
           const friend = realm.objects('User').filtered(`id == '${friendId}'`)
 
-          unsubs.push(
-            database()
-              .ref(`chats/${sorted}/queues/${auth().currentUser.uid}`)
-              .on('value', async snapshot => {
-                database().ref(`chats/${sorted}/queues/${auth().currentUser.uid}`).set([])
-                  .then(() => console.log('Data set.'));
-                if (!snapshot.val()) return
-                for (msg of snapshot.val()) {
-                  try {
-                    realm.create('ContentMessage', {
-                      id: await sha256(`${JSON.stringify(msg)}`),
-                      type: msg.content.type,
-                      value: msg.content.value
-                    })
-                    const content = realm.objects('ContentMessage').filtered(`id == '${sha256(`${JSON.stringify(msg)}`)}'`)[0]
-                    realm.create('Message', {
-                      id: await sha256(`${JSON.stringify(msg)}`),
-                      from: friend,
-                      to: me,
-                      timestamp: Date(parseInt(msg.timestamp)),
-                      content: content
-                    })
-                  } catch (e) { console.log(e) }
+          const unsubscriber = database()
+            .ref(`chats/${sorted}/queues/${me.id}`)
+            .on('value', async snapshot => {
+              database().ref(`chats/${sorted}/queues/${me.id}`).set([]).then(() => console.log('Data set.'));
+              if (!snapshot.val()) return
+              for (msg of snapshot.val()) {
+                realm.create('ContentMessage', {
+                  id: await sha256(`${JSON.stringify(msg)}`),
+                  type: msg.content.type,
+                  value: msg.content.value
+                })
+                const content = realm.objects('ContentMessage').filtered(`id == '${sha256(`${JSON.stringify(msg)}`)}'`)[0]
+                realm.create('Message', {
+                  id: await sha256(`${JSON.stringify(msg)}`),
+                  from: friend,
+                  to: me,
+                  timestamp: Date(parseInt(msg.timestamp)),
+                  content: content
+                })
 
-                }
-              })
-          )
+              }
+            })
 
+          unsubs.push(unsubscriber)
         }
-
       })
 
       return () => {
@@ -172,12 +98,10 @@ const Home = ({ navigation }) => {
         }
         unsubs = []
       }
-
-
+      
     }
 
-
-    run()
+    try { run() } catch (e) { console.log(e) }
 
   }, [flag])
 
@@ -220,15 +144,13 @@ const Home = ({ navigation }) => {
                 <Chat
                   yourUID={auth().currentUser.uid}
                   key={chat.id}
-                  picture={
-                    friend.profilePicture
-                  }
-                  name={
-                    friend.name
-                  }
-                  lastMessage={
-                    { id: '', timestamp: new Date(2012, 0, 1), content: { type: 'message', value: `                   ` } }
-                  }
+                  picture={friend.profilePicture}
+                  name={friend.name}
+                  lastMessage={{
+                    id: chat.messages[chat.messages.length - 1]?.id,
+                    timestamp: chat.messages[chat.messages.length - 1]?.timestamp,
+                    content: { type: 'message', value: chat.messages[chat.messages.length - 1]?.content.value }
+                  }}
                   onPhotoPress={() => {
                     setModalImageSelected(chat.picture)
                     setModalVisible(!modalVisible)
@@ -239,8 +161,6 @@ const Home = ({ navigation }) => {
                 />
               )
             }
-
-
           )
         }
 
@@ -249,6 +169,7 @@ const Home = ({ navigation }) => {
       <View style={{ height: 76, width: '100%', backgroundColor: 'blue' }}>
         <Text>AdSense place</Text>
       </View>
+
       <View style={{ height: 76, width: '100%', alignItems: 'center' }}>
         <SearchSvgComponent
           onPress={() => navigation.navigate('SearchPerson')}
