@@ -22,7 +22,7 @@ import Story from './Components/Story'
 
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
-import firstTimeOpenApp from './utils/firstTimeOpenApp'
+import firstTimeOpenApp from './utils/reload'
 
 let unsubs = []
 
@@ -38,7 +38,9 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     
     const run = async () => {
+
       const realm = await getRealm()
+
       const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
       
       if (!me) return setFlag(!flag)
@@ -140,17 +142,16 @@ const Home = ({ navigation }) => {
           chats.map(
             chat => {
               const friend = chat.owners.filter(user => user.id !== auth().currentUser.uid)[0]
+              const id = chat.messages.length === 0 ? `` : chat.messages[chat.messages.length - 1].id
+              const timestamp = chat.messages.length === 0 ? new Date() : chat.messages[chat.messages.length - 1].timestamp
+              const content = chat.messages.length === 0 ? { type: `message`, value:`        ` } : chat.messages[chat.messages.length - 1].content
               return (
                 <Chat
                   yourUID={auth().currentUser.uid}
                   key={chat.id}
                   picture={friend.profilePicture}
                   name={friend.name}
-                  lastMessage={{
-                    id: chat.messages[chat.messages.length - 1]?.id,
-                    timestamp: chat.messages[chat.messages.length - 1]?.timestamp,
-                    content: { type: 'message', value: chat.messages[chat.messages.length - 1]?.content.value }
-                  }}
+                  lastMessage={ { id, timestamp, content }}
                   onPhotoPress={() => {
                     setModalImageSelected(chat.picture)
                     setModalVisible(!modalVisible)

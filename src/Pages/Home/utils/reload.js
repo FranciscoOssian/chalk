@@ -14,6 +14,8 @@ export default async function () {
     const snapshot = await firestore().collection('Users').doc(`${me.id}`).collection('friends').doc('friends').get()
     const friends = snapshot.data()?.friends
 
+    if(!friends) return
+
     for (let friendID of friends) {
         const friendSnapShot = await firestore().collection('Users').doc(`${friendID}`).get()
         const friend = friendSnapShot.data()

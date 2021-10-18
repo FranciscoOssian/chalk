@@ -48,8 +48,17 @@ const SearchPeron = ({ navigation }) => {
               messages: []
             })
 
-            const snapshot = await firestore().collection('Users').doc(`${me.id}`).collection('friends').doc('friends').get()
-            const friends = snapshot.data()?.friends
+            let friends = []
+            let friendsSnapShot = await firestore().collection('Users').doc(`${me.id}`).collection('friends').doc('friends').get()
+            if(!friendsSnapShot.exists){
+              friends = [friend.id]
+              await firestore().collection('Users').doc(me.id).collection(`friends`).doc(`friends`).set({
+                friends
+              })
+            }
+            else {
+              friends = friendsSnapShot.data().friends
+            }
 
             if( friends.indexOf(friend.id) === -1 ){
               await firestore().collection('Users').doc(`${me.id}`).collection('friends').doc('friends').update({
@@ -62,7 +71,6 @@ const SearchPeron = ({ navigation }) => {
           })
         }
         else{
-          const chat = realm.objects('Chat').filtered(`id == '${chatName}'`)[0]
           navigation.navigate('Chat', { friendID: friendInDb.id, chatName})
         }
       })
