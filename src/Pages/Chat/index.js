@@ -132,7 +132,7 @@ const Chat = ({ route, navigation }) => {
       <View style={styles.header}>
 
         <TouchableOpacity
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.push('Home')}
         ><BackScreen />
         </TouchableOpacity>
 

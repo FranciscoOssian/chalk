@@ -62,16 +62,16 @@ const SearchPeron = ({ navigation }) => {
 
             if( friends.indexOf(friend.id) === -1 ){
               await firestore().collection('Users').doc(`${me.id}`).collection('friends').doc('friends').update({
-                friends: friends.push(friend.id)
+                friends: [ ...friends, friend.id ]
               })
             }
 
-            navigation.navigate('Chat', { friendID: user.id, chatName})
+            navigation.push('Chat', { friendID: user.id, chatName})
   
           })
         }
         else{
-          navigation.navigate('Chat', { friendID: friendInDb.id, chatName})
+          navigation.push('Chat', { friendID: friendInDb.id, chatName})
         }
       })
 

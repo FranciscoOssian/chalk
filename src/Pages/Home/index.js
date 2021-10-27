@@ -22,9 +22,10 @@ import Story from './Components/Story'
 
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
-import firstTimeOpenApp from './utils/reload'
+import firstTimeOpenApp from './utils/getMessagesWithFirebase'
 
 let unsubs = []
+let chatsTemp = []
 
 const Home = ({ navigation }) => {
 
@@ -35,77 +36,87 @@ const Home = ({ navigation }) => {
   const [chats, setChats] = useState([])
   const [flag, setFlag] = useState(false)
 
+  const [lastMessagesState, setLastMessagesState] = useState()
+
   useEffect(() => {
-    
+
+    console.log('oi')
+
     const run = async () => {
-
       const realm = await getRealm()
-
       const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
-      
       if (!me) return setFlag(!flag)
-      
       try {
         setMyProfilePicture(me.profilePicture)
       } catch (e) { console.log(e) }
-      
       if ((await AsyncStorage.getItem('firstTimeOpenApp')) !== 'false') await firstTimeOpenApp()
-      
       setChats(realm.objects('Chat'))
-
       await AsyncStorage.setItem('firstTimeOpenApp', 'false')
 
-      realm.write(async () => {
-        for (let chat of chats) {
+      setLastMessagesState(
+        realm.objects('Chat').map(
+          chat => ({ id: chat.id, lastMessage: chat.messages[chat.messages.length - 1] })
+        )
+      )
+    }
+    run()
+  }, [flag])
 
-          const sorted = [
-            chat.owners[0].id,
-            chat.owners[1].id
-          ].sort().join('-')
+  useEffect(() => {
+    const run = async () => {
+      const realm = await getRealm()
+      const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+      for (let chat of chats) {
 
-          const friendId = sorted.replace(auth().currentUser.uid, '').replace('-', '')
-          const friend = realm.objects('User').filtered(`id == '${friendId}'`)
+        const sorted = [
+          chat.owners[0].id,
+          chat.owners[1].id
+        ].sort().join('-')
+        const friendId = sorted.replace(auth().currentUser.uid, '').replace('-', '')
+        const friend = realm.objects('User').filtered(`id == '${friendId}'`)[0]
 
-          const unsubscriber = database()
-            .ref(`chats/${sorted}/queues/${me.id}`)
-            .on('value', async snapshot => {
-              database().ref(`chats/${sorted}/queues/${me.id}`).set([]).then(() => console.log('Data set.'));
-              if (!snapshot.val()) return
-              for (msg of snapshot.val()) {
+        const unsubscriber = database()
+          .ref(`chats/${sorted}/queues/${me.id}`).on('child_added', async snapshot => {
+            let resp = snapshot.val()
+            if (!resp) return
+            if (!Array.isArray(resp)) resp = [resp]
+            database().ref(`chats/${sorted}/queues/${me.id}`).set([]).then(() => console.log('Data set.'));
+            for (let msg of resp) {
+              const sha = await sha256(`${JSON.stringify(msg)}`)
+              realm.write(() => {
                 realm.create('ContentMessage', {
-                  id: await sha256(`${JSON.stringify(msg)}`),
-                  type: msg.content.type,
-                  value: msg.content.value
+                  id: sha,
+                  contentType: msg.content.type,
+                  value: msg.content.value.toString()
                 })
-                const content = realm.objects('ContentMessage').filtered(`id == '${sha256(`${JSON.stringify(msg)}`)}'`)[0]
+                const content = realm.objects('ContentMessage').filtered(`id == '${sha}'`)[0]
                 realm.create('Message', {
-                  id: await sha256(`${JSON.stringify(msg)}`),
+                  id: sha,
                   from: friend,
                   to: me,
                   timestamp: Date(parseInt(msg.timestamp)),
                   content: content
                 })
-
-              }
-            })
-
-          unsubs.push(unsubscriber)
-        }
-      })
+                chat.messages = [...chat.messages, realm.objects('Message').filtered(`id == '${sha}'`)[0]]
+              })
+              setChats( [...realm.objects('Chat')] )
+            }
+          })
+        unsubs.push(unsubscriber)
+      }
 
       return () => {
         for (let unsub of unsubs) {
-          console.log(unsub)
-          unsub()
+          unsub() 
         }
         unsubs = []
       }
-      
+
     }
 
     try { run() } catch (e) { console.log(e) }
 
-  }, [flag])
+  }, [])
 
 
   return (
@@ -144,20 +155,20 @@ const Home = ({ navigation }) => {
               const friend = chat.owners.filter(user => user.id !== auth().currentUser.uid)[0]
               const id = chat.messages.length === 0 ? `` : chat.messages[chat.messages.length - 1].id
               const timestamp = chat.messages.length === 0 ? new Date() : chat.messages[chat.messages.length - 1].timestamp
-              const content = chat.messages.length === 0 ? { type: `message`, value:`        ` } : chat.messages[chat.messages.length - 1].content
+              const content = chat.messages.length === 0 ? { type: `message`, value: `        ` } : chat.messages[chat.messages.length - 1].content
               return (
                 <Chat
                   yourUID={auth().currentUser.uid}
                   key={chat.id}
                   picture={friend.profilePicture}
                   name={friend.name}
-                  lastMessage={ { id, timestamp, content }}
+                  lastMessage={{ id, timestamp, content }}
                   onPhotoPress={() => {
                     setModalImageSelected(chat.picture)
                     setModalVisible(!modalVisible)
                   }}
                   onChatPress={async () => {
-                    navigation.navigate('Chat', { friendID: friend.id, chatName: [auth().currentUser.uid, friend.id].sort().join('-') })
+                    navigation.push('Chat', { friendID: friend.id, chatName: [auth().currentUser.uid, friend.id].sort().join('-') })
                   }}
                 />
               )
