@@ -13,10 +13,14 @@ import { launchImageLibrary } from 'react-native-image-picker'
 import { Picker } from '@react-native-picker/picker';
 
 import firestore from '@react-native-firebase/firestore'
+import storage from '@react-native-firebase/storage';
+import { utils } from '@react-native-firebase/app';
+import auth from '@react-native-firebase/auth'
 
 import getRealm from '../../../../services/realm'
 
-import auth from '@react-native-firebase/auth'
+
+let changeImage = false
 
 const EditProfile = ({ navigation }) => {
 
@@ -43,6 +47,7 @@ const EditProfile = ({ navigation }) => {
         }, result => {
             if (result.didCancel || result.errorCode) return
             setProfileImageUri(result.assets[0].uri)
+            changeImage = true
         })
     }
 
@@ -54,19 +59,28 @@ const EditProfile = ({ navigation }) => {
     const onHandleDone = async (userRecived) => {
         const realm = await getRealm()
         const user = await realm.objects('User').filtered(`id == '${userRecived.id}'`)[0]
+
+        let profilePicture = profileImageUri
+
+        if(changeImage){
+            const reference = storage().ref(`users/${auth().currentUser.uid}/profilePicture.jpg`);
+            await reference.putFile(profilePicture);
+            profilePicture = await reference.getDownloadURL()
+        }
+
         realm.write(() => {
             user.email = userRecived.email
             user.name = userRecived.name
             user.age = userRecived.age
             user.bio = userRecived.bio
-            user.profilePicture = userRecived.profilePicture
+            user.profilePicture = profilePicture
         });
         await editUserInFirebase({
             email: userRecived.email,
             name: userRecived.name,
             age: userRecived.age,
             bio: userRecived.bio,
-            profilePicture: userRecived.profilePicture,
+            profilePicture: profilePicture,
             id: userRecived.id,
         })
     }
@@ -77,14 +91,12 @@ const EditProfile = ({ navigation }) => {
                 <TouchableOpacity
                     onPress={async () => {
                         navigation.navigate('Account')
-                        const realm = await getRealm()
                         onHandleDone({
                             id: auth().currentUser.uid,
                             email: auth().currentUser.email,
                             name: name,
                             bio: bio,
-                            age: age,
-                            profilePicture: profileImageUri,
+                            age: age
                         })
                     }}
                     style={{ width: '90%' }}
