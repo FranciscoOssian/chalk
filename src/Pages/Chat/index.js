@@ -190,7 +190,18 @@ const Chat = ({ route, navigation }) => {
       </ScrollView>
       <View style={styles.inputMessageContainer}>
         <Audio />
-        <Camera />
+        <Camera
+          onPress={ async () => {
+            launchImageLibrary({
+              mediaType: 'photo',
+              includeBase64: true
+            }, result => {
+              if(result.didCancel) return
+              setInputMessage( { type: 'image', value: result.assets[0].base64 } )
+              onHandleMessageSend( { type: 'image', value: result.assets[0].base64 } )
+            } );
+          } }
+        />
         <TextInput
           style={styles.TextInput}
           placeholder="Aa"
