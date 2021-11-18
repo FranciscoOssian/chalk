@@ -24,6 +24,10 @@ import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
 import firstTimeOpenApp from './utils/getMessagesWithFirebase'
 
+import myDebug from '../../utils/debug/index'
+
+const debug = (...p) => myDebug('pages/Home/index.js',p)
+
 let unsubs = []
 let chatsTemp = []
 
@@ -36,15 +40,14 @@ const Home = ({ navigation }) => {
   const [chats, setChats] = useState([])
   const [flag, setFlag] = useState(false)
 
-  const [lastMessagesState, setLastMessagesState] = useState()
-
   useEffect(() => {
 
-    console.log('oi')
+    debug('oi')
 
     const run = async () => {
       const realm = await getRealm()
       const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+      debug(realm.objects('Message').map(m => m.content.value))
       if (!me) return setFlag(!flag)
       try {
         setMyProfilePicture(me.profilePicture)
@@ -52,12 +55,6 @@ const Home = ({ navigation }) => {
       if ((await AsyncStorage.getItem('firstTimeOpenApp')) !== 'false') await firstTimeOpenApp()
       setChats(realm.objects('Chat'))
       await AsyncStorage.setItem('firstTimeOpenApp', 'false')
-
-      setLastMessagesState(
-        realm.objects('Chat').map(
-          chat => ({ id: chat.id, lastMessage: chat.messages[chat.messages.length - 1] })
-        )
-      )
     }
     run()
   }, [flag])
@@ -66,12 +63,10 @@ const Home = ({ navigation }) => {
     const run = async () => {
       const realm = await getRealm()
       const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+
       for (let chat of chats) {
 
-        const sorted = [
-          chat.owners[0].id,
-          chat.owners[1].id
-        ].sort().join('-')
+        const sorted = [chat.owners[0].id,chat.owners[1].id].sort().join('-')
         const friendId = sorted.replace(auth().currentUser.uid, '').replace('-', '')
         const friend = realm.objects('User').filtered(`id == '${friendId}'`)[0]
 

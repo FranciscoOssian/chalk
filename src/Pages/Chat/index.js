@@ -26,35 +26,8 @@ import Camera from '../../../assests/images/pages/Chat/Camera'
 
 import Message from './Components/Message'
 
-function randomDate(start, end) {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-}
-
-const chat = {
-  messages: [],
-  owners: [
-    {
-      displayName: 'wdcjbdjc',
-      profilePicture: 'https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG',
-      uid: 'eee'
-    },
-    {
-      displayName: 'wedcfwedcf',
-      profilePicture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg',
-      uid: 'ddd'
-    }
-  ]
-}
-for (let i = 0; i < 100; ++i) {
-  let u = Math.random()
-  chat.messages.push({
-    id: `${u}`,
-    from: u > 0.5 ? 'ddd' : 'eee',
-    profilePicture: u > 0.5 ? chat.owners[1].profilePicture : chat.owners[0].profilePicture,
-    timestamp: randomDate(new Date(2012, 0, 1), new Date()),
-    content: u > Math.random() ? { type: 'image', uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' } : `oi${u}?bem?`
-  })
-}
+import myDebug from '../../utils/debug/index'
+const debug = (...p) => myDebug('pages/Chat/index.js', p)
 
 const Chat = ({ route, navigation }) => {
 
@@ -90,6 +63,9 @@ const Chat = ({ route, navigation }) => {
   }, [])
 
   const onHandleMessageSend = async (message) => {
+
+    debug(message)
+
     const realm = await getRealm()
     const sha = await sha256(`${JSON.stringify(message)}`)
     const chatName = [auth().currentUser.uid, friendID].sort().join('-')
@@ -115,13 +91,13 @@ const Chat = ({ route, navigation }) => {
       database().ref(`chats/${chatName}/queues/${friendID}`).once('value')
       .then(snapshot => {
         const prev = snapshot.val()? snapshot.val() : []
-        console.log(prev, chatName, friendID)
+        debug(chatName, friendID)
         database().ref(`chats/${chatName}/queues/${friendID}`).set([...prev, {
           content:{
             type: content.contentType,
             value: content.value,
           },
-          timestamp: date.getDate(),
+          timestamp: Date.now(),
         }])
       });
     })
