@@ -45,10 +45,7 @@ const Chat = ({ route, navigation }) => {
 
   const [messages, setMessages] = useState([])
 
-  const [inputMessage, setInputMessage] = useState({
-      type:'',
-      value:''
-  })
+  const [inputMessage, setInputMessage] = useState({type:'',value:''})
 
   useEffect(() => {
     const run  = async () => {
@@ -64,10 +61,12 @@ const Chat = ({ route, navigation }) => {
 
   const onHandleMessageSend = async (message) => {
 
-    debug(message)
+    if(message.value === '') return
+
+    debug('message to send', message)
 
     const realm = await getRealm()
-    const sha = await sha256(`${JSON.stringify(message)}`)
+    const sha = await sha256(`${JSON.stringify(message)}${Date.now()}`)
     const chatName = [auth().currentUser.uid, friendID].sort().join('-')
     
     realm.write(  () => {
@@ -91,7 +90,7 @@ const Chat = ({ route, navigation }) => {
       database().ref(`chats/${chatName}/queues/${friendID}`).once('value')
       .then(snapshot => {
         const prev = snapshot.val()? snapshot.val() : []
-        debug(chatName, friendID)
+        debug('chat name: ',chatName, 'friend id:', friendID)
         database().ref(`chats/${chatName}/queues/${friendID}`).set([...prev, {
           content:{
             type: content.contentType,
