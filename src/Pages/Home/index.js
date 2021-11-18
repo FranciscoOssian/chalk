@@ -29,7 +29,6 @@ import myDebug from '../../utils/debug/index'
 const debug = (...p) => myDebug('pages/Home/index.js',p)
 
 let unsubs = []
-let chatsTemp = []
 
 const Home = ({ navigation }) => {
 
@@ -159,7 +158,7 @@ const Home = ({ navigation }) => {
                   name={friend.name}
                   lastMessage={{ id, timestamp, content }}
                   onPhotoPress={() => {
-                    setModalImageSelected(chat.picture)
+                    setModalImageSelected(friend.profilePicture)
                     setModalVisible(!modalVisible)
                   }}
                   onChatPress={async () => {
