@@ -47,6 +47,8 @@ const Chat = ({ route, navigation }) => {
 
   const [inputMessage, setInputMessage] = useState({type:'',value:''})
 
+  const [flagRender, setFlagRender] = useState(false)
+
   useEffect(() => {
     const run  = async () => {
       const chatName = [auth().currentUser.uid, friendID].sort().join('-')
@@ -58,6 +60,16 @@ const Chat = ({ route, navigation }) => {
     }
     run()
   }, [])
+
+  useEffect(() => {
+    const run  = async () => {
+      const realm = await getRealm()
+      const chatName = [auth().currentUser.uid, friendID].sort().join('-')
+      const messages = realm.objects('Chat').filtered(`id == '${chatName}'`)[0].messages
+      setMessages( messages )
+    }
+    run()
+  }, [flagRender])
 
   const onHandleMessageSend = async (message) => {
 
@@ -195,10 +207,10 @@ const Chat = ({ route, navigation }) => {
             launchImageLibrary({
               mediaType: 'photo',
               includeBase64: true
-            }, result => {
+            }, async result => {
               if(result.didCancel) return
-              setInputMessage( { type: 'image', value: result.assets[0].base64 } )
-              onHandleMessageSend( { type: 'image', value: result.assets[0].base64 } )
+              await onHandleMessageSend( { type: 'image', value: result.assets[0].base64 } )
+              setFlagRender(!flagRender)
             } );
           } }
         />
