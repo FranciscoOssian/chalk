@@ -46,7 +46,6 @@ const Home = ({ navigation }) => {
     const run = async () => {
       const realm = await getRealm()
       const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
-      debug(realm.objects('Message').map(m => m.content.value))
       if (!me) return setFlag(!flag)
       try {
         setMyProfilePicture(me.profilePicture)
@@ -146,17 +145,17 @@ const Home = ({ navigation }) => {
         {
           chats.map(
             chat => {
+              const lastMessage = [...chat.messages].pop()
               const friend = chat.owners.filter(user => user.id !== auth().currentUser.uid)[0]
-              const id = chat.messages.length === 0 ? `` : chat.messages[chat.messages.length - 1].id
-              const timestamp = chat.messages.length === 0 ? new Date() : chat.messages[chat.messages.length - 1].timestamp
-              const content = chat.messages.length === 0 ? { type: `message`, value: `        ` } : chat.messages[chat.messages.length - 1].content
+              const timestamp = chat.messages.length === 0 ? new Date() : lastMessage.timestamp
+              const content = chat.messages.length === 0 ? { type: `message`, value: `        ` } : lastMessage.content
               return (
                 <Chat
                   yourUID={auth().currentUser.uid}
                   key={chat.id}
                   picture={friend.profilePicture}
                   name={friend.name}
-                  lastMessage={{ id, timestamp, content }}
+                  lastMessage={{ id: lastMessage.from.id, timestamp, content }}
                   onPhotoPress={() => {
                     setModalImageSelected(friend.profilePicture)
                     setModalVisible(!modalVisible)
