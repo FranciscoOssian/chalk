@@ -1,9 +1,12 @@
 import * as React from 'react';
 import { Text, View, Image, StyleSheet, ScrollView } from 'react-native'
 
+import myDebug from '../../../../utils/debug/index'
+const debug = (...p) => myDebug('pages/Chat/Components/Message', p)
+
 const MyMessage = ({ content, profilePicture }) => {
 
-    const isImageContent = content.type === 'image' ? true : false
+    const isImageContent = content.contentType === 'image' ? true : false
 
     return (
         <View style={[styles.message, { justifyContent: 'flex-end' }]}>
@@ -11,7 +14,7 @@ const MyMessage = ({ content, profilePicture }) => {
                 {
                     isImageContent ?
                         <Image
-                            source={{ uri: content.value }}
+                            source={{ uri: 'data:image/png;base64,' + content.value }}
                             style={{width: '100%', height: 150}}
                         />
                         :
@@ -28,7 +31,7 @@ const MyMessage = ({ content, profilePicture }) => {
 
 const FriendMessage = ({ content, profilePicture }) => {
 
-    const isImageContent = content.type === 'image' ? true : false
+    const isImageContent = content.contentType === 'image' ? true : false
 
     return (
         <View style={[styles.message]}>
@@ -40,7 +43,7 @@ const FriendMessage = ({ content, profilePicture }) => {
                 {
                     isImageContent ?
                         <Image
-                            source={{ uri: content.value }}
+                            source={{ uri: 'data:image/png;base64,' + content.value }}
                             style={{width: '100%', height: 150}}
                         />
                         :
@@ -54,6 +57,10 @@ const FriendMessage = ({ content, profilePicture }) => {
 const Message = ({ content, profilePicture, timestamp, from, yourUID }) => {
 
     const yourMessage = from.id === yourUID
+
+    if(content.contentType === 'image'){
+        debug('wait, image detected')
+    }
 
     return (
         <View style={styles.container}>

@@ -90,7 +90,7 @@ const EditProfile = ({ navigation }) => {
             <View style={styles.head}>
                 <TouchableOpacity
                     onPress={async () => {
-                        navigation.navigate('Account')
+                        navigation.push('Account')
                         onHandleDone({
                             id: auth().currentUser.uid,
                             email: auth().currentUser.email,

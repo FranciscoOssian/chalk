@@ -24,8 +24,11 @@ import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
 import firstTimeOpenApp from './utils/getMessagesWithFirebase'
 
+import myDebug from '../../utils/debug/index'
+
+const debug = (...p) => myDebug('pages/Home/index.js',p)
+
 let unsubs = []
-let chatsTemp = []
 
 const Home = ({ navigation }) => {
 
@@ -36,11 +39,9 @@ const Home = ({ navigation }) => {
   const [chats, setChats] = useState([])
   const [flag, setFlag] = useState(false)
 
-  const [lastMessagesState, setLastMessagesState] = useState()
-
   useEffect(() => {
 
-    console.log('oi')
+    debug('oi')
 
     const run = async () => {
       const realm = await getRealm()
@@ -52,12 +53,6 @@ const Home = ({ navigation }) => {
       if ((await AsyncStorage.getItem('firstTimeOpenApp')) !== 'false') await firstTimeOpenApp()
       setChats(realm.objects('Chat'))
       await AsyncStorage.setItem('firstTimeOpenApp', 'false')
-
-      setLastMessagesState(
-        realm.objects('Chat').map(
-          chat => ({ id: chat.id, lastMessage: chat.messages[chat.messages.length - 1] })
-        )
-      )
     }
     run()
   }, [flag])
@@ -66,12 +61,10 @@ const Home = ({ navigation }) => {
     const run = async () => {
       const realm = await getRealm()
       const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+
       for (let chat of chats) {
 
-        const sorted = [
-          chat.owners[0].id,
-          chat.owners[1].id
-        ].sort().join('-')
+        const sorted = [chat.owners[0].id,chat.owners[1].id].sort().join('-')
         const friendId = sorted.replace(auth().currentUser.uid, '').replace('-', '')
         const friend = realm.objects('User').filtered(`id == '${friendId}'`)[0]
 
@@ -152,19 +145,19 @@ const Home = ({ navigation }) => {
         {
           chats.map(
             chat => {
+              const lastMessage = [...chat.messages].pop()
               const friend = chat.owners.filter(user => user.id !== auth().currentUser.uid)[0]
-              const id = chat.messages.length === 0 ? `` : chat.messages[chat.messages.length - 1].id
-              const timestamp = chat.messages.length === 0 ? new Date() : chat.messages[chat.messages.length - 1].timestamp
-              const content = chat.messages.length === 0 ? { type: `message`, value: `        ` } : chat.messages[chat.messages.length - 1].content
+              const timestamp = chat.messages.length === 0 ? new Date() : lastMessage.timestamp
+              const content = chat.messages.length === 0 ? { type: `message`, value: `        ` } : lastMessage.content
               return (
                 <Chat
                   yourUID={auth().currentUser.uid}
                   key={chat.id}
                   picture={friend.profilePicture}
                   name={friend.name}
-                  lastMessage={{ id, timestamp, content }}
+                  lastMessage={{ id: lastMessage.from.id, timestamp, content }}
                   onPhotoPress={() => {
-                    setModalImageSelected(chat.picture)
+                    setModalImageSelected(friend.profilePicture)
                     setModalVisible(!modalVisible)
                   }}
                   onChatPress={async () => {

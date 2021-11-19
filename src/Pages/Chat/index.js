@@ -26,35 +26,8 @@ import Camera from '../../../assests/images/pages/Chat/Camera'
 
 import Message from './Components/Message'
 
-function randomDate(start, end) {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-}
-
-const chat = {
-  messages: [],
-  owners: [
-    {
-      displayName: 'wdcjbdjc',
-      profilePicture: 'https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG',
-      uid: 'eee'
-    },
-    {
-      displayName: 'wedcfwedcf',
-      profilePicture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg',
-      uid: 'ddd'
-    }
-  ]
-}
-for (let i = 0; i < 100; ++i) {
-  let u = Math.random()
-  chat.messages.push({
-    id: `${u}`,
-    from: u > 0.5 ? 'ddd' : 'eee',
-    profilePicture: u > 0.5 ? chat.owners[1].profilePicture : chat.owners[0].profilePicture,
-    timestamp: randomDate(new Date(2012, 0, 1), new Date()),
-    content: u > Math.random() ? { type: 'image', uri: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg' } : `oi${u}?bem?`
-  })
-}
+import myDebug from '../../utils/debug/index'
+const debug = (...p) => myDebug('pages/Chat/index.js', p)
 
 const Chat = ({ route, navigation }) => {
 
@@ -72,10 +45,9 @@ const Chat = ({ route, navigation }) => {
 
   const [messages, setMessages] = useState([])
 
-  const [inputMessage, setInputMessage] = useState({
-      type:'',
-      value:''
-  })
+  const [inputMessage, setInputMessage] = useState({type:'',value:''})
+
+  const [flagRender, setFlagRender] = useState(false)
 
   useEffect(() => {
     const run  = async () => {
@@ -89,9 +61,24 @@ const Chat = ({ route, navigation }) => {
     run()
   }, [])
 
+  useEffect(() => {
+    const run  = async () => {
+      const realm = await getRealm()
+      const chatName = [auth().currentUser.uid, friendID].sort().join('-')
+      const messages = realm.objects('Chat').filtered(`id == '${chatName}'`)[0].messages
+      setMessages( messages )
+    }
+    run()
+  }, [flagRender])
+
   const onHandleMessageSend = async (message) => {
+
+    if(message.value === '') return
+
+    debug('message to send', message)
+
     const realm = await getRealm()
-    const sha = await sha256(`${JSON.stringify(message)}`)
+    const sha = await sha256(`${JSON.stringify(message)}${Date.now()}`)
     const chatName = [auth().currentUser.uid, friendID].sort().join('-')
     
     realm.write(  () => {
@@ -115,13 +102,13 @@ const Chat = ({ route, navigation }) => {
       database().ref(`chats/${chatName}/queues/${friendID}`).once('value')
       .then(snapshot => {
         const prev = snapshot.val()? snapshot.val() : []
-        console.log(prev, chatName, friendID)
+        debug('chat name: ',chatName, 'friend id:', friendID)
         database().ref(`chats/${chatName}/queues/${friendID}`).set([...prev, {
           content:{
             type: content.contentType,
             value: content.value,
           },
-          timestamp: date.getDate(),
+          timestamp: Date.now(),
         }])
       });
     })
@@ -215,7 +202,18 @@ const Chat = ({ route, navigation }) => {
       </ScrollView>
       <View style={styles.inputMessageContainer}>
         <Audio />
-        <Camera />
+        <Camera
+          onPress={ async () => {
+            launchImageLibrary({
+              mediaType: 'photo',
+              includeBase64: true
+            }, async result => {
+              if(result.didCancel) return
+              await onHandleMessageSend( { type: 'image', value: result.assets[0].base64 } )
+              setFlagRender(!flagRender)
+            } );
+          } }
+        />
         <TextInput
           style={styles.TextInput}
           placeholder="Aa"

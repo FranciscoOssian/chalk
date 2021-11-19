@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { Text, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
 
+import myDebug from '../../../../utils/debug/index'
+const debug = (...p) => myDebug('Pages/Home/Components/Chat/index.js', p)
+
 function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -24,7 +27,20 @@ const Read = (view) =>
         }
     </View>
 
-const Chat = ({ id, picture, name, lastMessage, yourUID, onPhotoPress, onChatPress }) => {
+const message = (lastMessage, yourUID) => {
+    const tagTo = lastMessage.id === yourUID ? 'you:' : ''
+    const time = `   •   ${formatAMPM(lastMessage.timestamp)}`
+    if( lastMessage.content.contentType === 'message' ){
+        const text = lastMessage.content.value.substring(0, 19)
+        const dot3 = lastMessage.content.value.length > 19 ? '...' : ''
+        return (`${tagTo}${text}${dot3}${time}`)
+    }
+    else{
+        return(`${tagTo} image📷 ${time}`)
+    }
+}
+
+const Chat = ({ picture, name, lastMessage, yourUID, onPhotoPress, onChatPress }) => {
     return (
         <View style={styles.container}>
             <View style={styles.container2}>
@@ -43,9 +59,7 @@ const Chat = ({ id, picture, name, lastMessage, yourUID, onPhotoPress, onChatPre
                 >
                     <Text style={styles.name}>{name}</Text>
                     <Text style={styles.content}>
-                        {lastMessage.id === yourUID ? 'you:' : ''}
-                        {`${lastMessage.content.value.substring(0, 19)}${lastMessage.content.value.length > 19 ? '...' : ''}`}
-                        {`   •   ${formatAMPM(lastMessage.timestamp)}`}
+                        {message(lastMessage, yourUID)}
                     </Text>
                 </TouchableOpacity>
             </View>
