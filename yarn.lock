@@ -6227,6 +6227,13 @@ react-is@^16.13.0, react-is@^16.7.0, react-is@^16.8.1:
   resolved "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
+react-native-admob-alpha@^1.2.5:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/react-native-admob-alpha/-/react-native-admob-alpha-1.2.5.tgz#72f506c0f96e9a4221c5dc9341a0cbc3b2a4a5b2"
+  integrity sha512-gEgUT/4enphWY7ff+6aYINsqSBgOKbdWPJFGdzjUa9XUtKE3x1Fp6McO0QfLpJ4kwGOtBKD87JoBKHA6y2WlOQ==
+  dependencies:
+    prop-types "^15.7.2"
+
 react-native-codegen@^0.0.7:
   version "0.0.7"
   resolved "https://registry.npmjs.org/react-native-codegen/-/react-native-codegen-0.0.7.tgz"

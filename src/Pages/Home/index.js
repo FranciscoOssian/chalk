@@ -15,6 +15,13 @@ import database from '@react-native-firebase/database'
 import { sha256 } from 'react-native-sha256';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import {
+  AdMobBanner,
+  AdMobInterstitial,
+  PublisherBanner,
+  AdMobRewarded,
+} from 'react-native-admob-alpha'
+
 import getRealm from '../../services/realm'
 
 import Chat from './Components/Chat'
@@ -171,9 +178,14 @@ const Home = ({ navigation }) => {
 
       </ScrollView>
 
-      <View style={{ height: 76, width: '100%', backgroundColor: 'blue' }}>
-        <Text>AdSense place</Text>
-      </View>
+      
+      <AdMobBanner
+        adSize="fullBanner"
+        adUnitID="ca-app-pub-3940256099942544/6300978111"
+        testDevices={[AdMobBanner.simulatorId]}
+        adViewDidReceiveAd={(a) => console.log("RECEIVED AD " + a)}
+        onAdFailedToLoad={error => console.error(error)}
+      />
 
       <View style={{ height: 76, width: '100%', alignItems: 'center' }}>
         <SearchSvgComponent
