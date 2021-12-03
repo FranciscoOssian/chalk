@@ -48,8 +48,6 @@ const Home = ({ navigation }) => {
 
   useEffect(() => {
 
-    debug('oi')
-
     const run = async () => {
       const realm = await getRealm()
       const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
@@ -162,7 +160,7 @@ const Home = ({ navigation }) => {
                   key={chat.id}
                   picture={friend.profilePicture}
                   name={friend.name}
-                  lastMessage={{ id: lastMessage.from.id, timestamp, content }}
+                  lastMessage={{ id: lastMessage?.from.id, timestamp, content }}
                   onPhotoPress={() => {
                     setModalImageSelected(friend.profilePicture)
                     setModalVisible(!modalVisible)

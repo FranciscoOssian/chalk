@@ -14,6 +14,8 @@ import RNFetchBlob from 'rn-fetch-blob'
 import { launchImageLibrary } from 'react-native-image-picker';
 import auth from '@react-native-firebase/auth'
 import database from '@react-native-firebase/database'
+import storage from '@react-native-firebase/storage';
+import ImageResizer from 'react-native-image-resizer';
 import { sha256 } from 'react-native-sha256';
 
 import getRealm from '../../services/realm';
@@ -75,17 +77,48 @@ const Chat = ({ route, navigation }) => {
 
     if(message.value === '') return
 
-    debug('message to send', message)
-
     const realm = await getRealm()
     const sha = await sha256(`${JSON.stringify(message)}${Date.now()}`)
     const chatName = [auth().currentUser.uid, friendID].sort().join('-')
-    
+
+    debug(message)
+
+    try{
+      RNFetchBlob.fs.mkdir(RNFetchBlob.fs.dirs.PictureDir + '/Chatalk')
+    }
+    catch(e){}
+
+    let reference
+    let newUri
+    if( message.type === 'image' ){
+      newUri = await ImageResizer.createResizedImage(
+        message.value,
+        600,
+        600,
+        'PNG',
+        100,
+        0,
+        RNFetchBlob.fs.dirs.PictureDir + '/Chatalk'
+      )
+      debug('friendID', friendID, sha, auth().currentUser, `chats/${chatName}/${friendID}/${sha}.png`)
+      reference = storage().ref(`chats/${chatName}/${friendID}/${sha}.png`);
+      try{
+        await reference.putFile(newUri.uri)
+      }
+      catch(e){ debug('eeeeeee', e) }
+    }
+
+    debug('iiiiiiiiiiiiiiiiii')
+
+    debug('uooouooooooooo',  await reference.getDownloadURL())
+
+    const value = message.type === 'image'? await reference.getDownloadURL() : message.value
+
     realm.write(  () => {
       realm.create('ContentMessage', {
         id: sha,
         contentType: message.type,
-        value: message.value
+        value: newUri.uri
       })
       const date = new Date()
       const content = realm.objects('ContentMessage').filtered(`id == '${sha}'`)[0]
@@ -102,11 +135,10 @@ const Chat = ({ route, navigation }) => {
       database().ref(`chats/${chatName}/queues/${friendID}`).once('value')
       .then(snapshot => {
         const prev = snapshot.val()? snapshot.val() : []
-        debug('chat name: ',chatName, 'friend id:', friendID)
         database().ref(`chats/${chatName}/queues/${friendID}`).set([...prev, {
           content:{
             type: content.contentType,
-            value: content.value,
+            value: value,
           },
           timestamp: Date.now(),
         }])
@@ -209,7 +241,10 @@ const Chat = ({ route, navigation }) => {
               includeBase64: true
             }, async result => {
               if(result.didCancel) return
-              await onHandleMessageSend( { type: 'image', value: result.assets[0].base64 } )
+              await onHandleMessageSend( {
+                type: 'image',
+                value: result.assets[0].uri
+              } )
               setFlagRender(!flagRender)
             } );
           } }
@@ -224,7 +259,10 @@ const Chat = ({ route, navigation }) => {
         <BackScreen
           onPress={ async () => {
             await onHandleMessageSend(inputMessage)
-            setInputMessage({ type:'', value:'' })
+            try{
+              setInputMessage({ type:'', value:'' })
+            }
+            catch(e){debug(e)}
           } }
         />
       </View>

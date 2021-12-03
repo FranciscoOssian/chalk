@@ -1215,7 +1215,7 @@
   resolved "https://registry.yarnpkg.com/@react-native-firebase/firestore/-/firestore-12.9.0.tgz#50f538c40a005ceb2e3af847905238b795462679"
   integrity sha512-w+0q5WJ5kkxcbZv8OX8aGrseznYlhdFFM40JaDYhTayBSsopVwm2dxzo07P1FbNv+c7JzPWKcDW3+jGC539jCg==
 
-"@react-native-firebase/storage@^12.9.3":
+"@react-native-firebase/storage@12.9.3":
   version "12.9.3"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/storage/-/storage-12.9.3.tgz#40370726acf1c7ee97aaae792ad74083d86d1a6e"
   integrity sha512-tBdpZkM88rGVLzPMRJc2/tG1EqQJvdtGs/iXIPBtuFj7uUfaRXQUAzbGDUgzLfTQ8t2XmSiyNEz1V7wYrHkt7w==
@@ -6266,6 +6266,11 @@ react-native-image-picker@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/react-native-image-picker/-/react-native-image-picker-4.1.1.tgz#f5b20c77b060e4a8cad4e76ae042e1e45b4743da"
   integrity sha512-O78kljfaLQkFNzba4yWueqXlAWzDNzYUavqSQloJAf+ISGsOk95WO/a4Tp27E6hck8vPtx7u0GBrvEULyh1XAw==
+
+react-native-image-resizer@^1.4.5:
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/react-native-image-resizer/-/react-native-image-resizer-1.4.5.tgz#5a520aa8baa07638b1894a1d87d4d9a0945c8d58"
+  integrity sha512-33EgL3C9pyvjKpullAB6fWyD5QhoYEpNNB9rxNvUsrpAnL2mHBW7PTrUCCZudJeB6Weg7nbweKrSw1nnto5aqg==
 
 react-native-safe-area-context@^3.3.2:
   version "3.3.2"
