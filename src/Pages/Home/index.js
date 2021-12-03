@@ -33,6 +33,10 @@ import firstTimeOpenApp from './utils/getMessagesWithFirebase'
 
 import myDebug from '../../utils/debug/index'
 
+import Core from '../../services/core'
+
+const core = new Core();
+
 const debug = (...p) => myDebug('pages/Home/index.js',p)
 
 let unsubs = []
@@ -50,7 +54,7 @@ const Home = ({ navigation }) => {
 
     const run = async () => {
       const realm = await getRealm()
-      const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+      const me = await core.localDB.get.myUser()
       if (!me) return setFlag(!flag)
       try {
         setMyProfilePicture(me.profilePicture)
@@ -65,7 +69,7 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     const run = async () => {
       const realm = await getRealm()
-      const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+      const me = await core.localDB.get.myUser()
 
       for (let chat of chats) {
 
