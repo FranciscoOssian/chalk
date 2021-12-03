@@ -34,21 +34,15 @@ const debug = (...p) => myDebug('pages/Chat/index.js', p)
 const Chat = ({ route, navigation }) => {
 
   const scrollViewRef = useRef();
-
   const { friendID, chatName } = route.params;
-
   const [friend, setFriend] = useState({
     profilePicture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg'
   });
-
   const [myUser, setMyUser] = useState({
     profilePicture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg'
   })
-
   const [messages, setMessages] = useState([])
-
   const [inputMessage, setInputMessage] = useState({type:'',value:''})
-
   const [flagRender, setFlagRender] = useState(false)
 
   useEffect(() => {
@@ -81,8 +75,6 @@ const Chat = ({ route, navigation }) => {
     const sha = await sha256(`${JSON.stringify(message)}${Date.now()}`)
     const chatName = [auth().currentUser.uid, friendID].sort().join('-')
 
-    debug(message)
-
     try{
       RNFetchBlob.fs.mkdir(RNFetchBlob.fs.dirs.PictureDir + '/Chatalk')
     }
@@ -107,10 +99,6 @@ const Chat = ({ route, navigation }) => {
       }
       catch(e){ debug('eeeeeee', e) }
     }
-
-    debug('iiiiiiiiiiiiiiiiii')
-
-    debug('uooouooooooooo',  await reference.getDownloadURL())
 
     const value = message.type === 'image'? await reference.getDownloadURL() : message.value
 
@@ -144,6 +132,8 @@ const Chat = ({ route, navigation }) => {
         }])
       });
     })
+
+
   }
 
   return (
