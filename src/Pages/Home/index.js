@@ -11,34 +11,23 @@ import {
 } from 'react-native'
 
 import auth from '@react-native-firebase/auth'
-import database from '@react-native-firebase/database'
-import { sha256 } from 'react-native-sha256';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import {
   AdMobBanner,
-  AdMobInterstitial,
-  PublisherBanner,
-  AdMobRewarded,
 } from 'react-native-admob-alpha'
 
 import getRealm from '../../services/realm'
 
 import Chat from './Components/Chat'
 import Story from './Components/Story'
-
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
 import firstTimeOpenApp from './utils/getMessagesWithFirebase'
-
+import Core from '../../services/core'
 import myDebug from '../../utils/debug/index'
 
-import Core from '../../services/core'
-
 const core = new Core();
-
-const debug = (...p) => myDebug('pages/Home/index.js',p)
-
+const debug = (...p) => myDebug('pages/Home/index.js', p)
 let unsubs = []
 
 const Home = ({ navigation }) => {
@@ -51,9 +40,8 @@ const Home = ({ navigation }) => {
   const [flag, setFlag] = useState(false)
 
   useEffect(() => {
-
     const run = async () => {
-      const realm = await getRealm()
+      const realm = await core.localDB.databases.realm
       const me = await core.localDB.get.myUser()
       if (!me) return setFlag(!flag)
       try {
@@ -68,55 +56,33 @@ const Home = ({ navigation }) => {
 
   useEffect(() => {
     const run = async () => {
-      const realm = await getRealm()
       const me = await core.localDB.get.myUser()
-
       for (let chat of chats) {
-
-        const sorted = [chat.owners[0].id,chat.owners[1].id].sort().join('-')
+        const sorted = [chat.owners[0].id, chat.owners[1].id].sort().join('-')
         const friendId = sorted.replace(auth().currentUser.uid, '').replace('-', '')
-        const friend = realm.objects('User').filtered(`id == '${friendId}'`)[0]
+        const friend = await core.localDB.get.user(friendId)
 
-        const unsubscriber = database()
-          .ref(`chats/${sorted}/queues/${me.id}`).on('child_added', async snapshot => {
-            let resp = snapshot.val()
-            if (!resp) return
-            if (!Array.isArray(resp)) resp = [resp]
-            database().ref(`chats/${sorted}/queues/${me.id}`).set([]).then(() => console.log('Data set.'));
-            for (let msg of resp) {
-              const sha = await sha256(`${JSON.stringify(msg)}`)
-              realm.write(() => {
-                realm.create('ContentMessage', {
-                  id: sha,
-                  contentType: msg.content.type,
-                  value: msg.content.value.toString()
-                })
-                const content = realm.objects('ContentMessage').filtered(`id == '${sha}'`)[0]
-                realm.create('Message', {
-                  id: sha,
-                  from: friend,
-                  to: me,
-                  timestamp: Date(parseInt(msg.timestamp)),
-                  content: content
-                })
-                chat.messages = [...chat.messages, realm.objects('Message').filtered(`id == '${sha}'`)[0]]
-              })
-              setChats( [...realm.objects('Chat')] )
-            }
+        const unsub = await core.events.onMessageReceived({
+          chatName: sorted
+        }, (msg) => {
+          core.localDB.create.message({
+              content: msg.content,
+              from: friend,
+              to: me,
+              timestamp: msg.timestamp
           })
-        unsubs.push(unsubscriber)
+        })
+        unsubs.push(unsub)
       }
 
       return () => {
-        for (let unsub of unsubs) {
-          unsub() 
-        }
+        for (let unsub of unsubs) unsub()
         unsubs = []
       }
 
     }
 
-    try { run() } catch (e) { console.log(e) }
+    run()
 
   }, [])
 
@@ -180,7 +146,7 @@ const Home = ({ navigation }) => {
 
       </ScrollView>
 
-      
+
       <AdMobBanner
         adSize="fullBanner"
         adUnitID="ca-app-pub-3940256099942544/6300978111"

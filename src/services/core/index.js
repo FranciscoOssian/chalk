@@ -14,13 +14,20 @@ export default class Core {
             jsonStore: database
         };
         this.localDB = {
+            databases: {
+                realm: getRealm()
+            },
             get: {
                 myUser: async () => {
                     const realm = await getRealm();
                     const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
                     return me;
                 },
-                user: (id) => { },
+                user: async (id) => {
+                    const realm = await getRealm();
+                    const friend = await realm.objects('User').filtered(`id == '${id}'`)[0]
+                    return friend;
+                },
                 chat: (id) => { },
                 message: (id) => realm.objects('Message').filtered(`id == '${id}'`)[0]
             },
@@ -59,7 +66,7 @@ export default class Core {
             onMessageReceived: async (config, callback) => {
                 const me = await this.localDB.get.myUser()
                 chatPath = `chats/${config.chatName}/queues/${me.id}`
-                database()
+                return database()
                     .ref(chatPath).on('child_added',
                     async snapshot => {
                         let resp = snapshot.val()
@@ -68,12 +75,6 @@ export default class Core {
                         database().ref(chatPath).set([]).then(() => console.log('Data set.'));
                         for (let msg of resp) {
                             callback(msg)
-                            //this.localDB.create.message({
-                            //    content: msg.content,
-                            //    from: null,
-                            //    to: me,
-                            //    timestamp: msg.timestamp
-                            //})
                         }
                     })
             }
