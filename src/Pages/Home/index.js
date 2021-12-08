@@ -16,8 +16,6 @@ import {
   AdMobBanner,
 } from 'react-native-admob-alpha'
 
-import getRealm from '../../services/realm'
-
 import Chat from './Components/Chat'
 import Story from './Components/Story'
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
