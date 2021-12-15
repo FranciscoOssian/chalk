@@ -11,50 +11,38 @@ import {
 } from 'react-native'
 
 import auth from '@react-native-firebase/auth'
-import database from '@react-native-firebase/database'
-import { sha256 } from 'react-native-sha256';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import {
   AdMobBanner,
-  AdMobInterstitial,
-  PublisherBanner,
-  AdMobRewarded,
 } from 'react-native-admob-alpha'
-
-import getRealm from '../../services/realm'
 
 import Chat from './Components/Chat'
 import Story from './Components/Story'
-
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
 import firstTimeOpenApp from './utils/getMessagesWithFirebase'
-
+import Core from '../../services/core'
 import myDebug from '../../utils/debug/index'
 
-const debug = (...p) => myDebug('pages/Home/index.js',p)
+import { useLocalUser } from '../../Hooks/localDatabase/user'
 
+const core = new Core();
+const debug = (...p) => myDebug('pages/Home/index.js', p)
 let unsubs = []
 
 const Home = ({ navigation }) => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modelImageSelected, setModalImageSelected] = useState('');
-
-  const [myProfilePicture, setMyProfilePicture] = useState('https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG')
   const [chats, setChats] = useState([])
   const [flag, setFlag] = useState(false)
 
-  useEffect(() => {
+  const { user: me } = useLocalUser()
 
+  useEffect(() => {
     const run = async () => {
-      const realm = await getRealm()
-      const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+      const realm = await core.localDB.databases.realm
       if (!me) return setFlag(!flag)
-      try {
-        setMyProfilePicture(me.profilePicture)
-      } catch (e) { console.log(e) }
       if ((await AsyncStorage.getItem('firstTimeOpenApp')) !== 'false') await firstTimeOpenApp()
       setChats(realm.objects('Chat'))
       await AsyncStorage.setItem('firstTimeOpenApp', 'false')
@@ -64,55 +52,32 @@ const Home = ({ navigation }) => {
 
   useEffect(() => {
     const run = async () => {
-      const realm = await getRealm()
-      const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
-
       for (let chat of chats) {
+        const sorted = [chat.owners[0].id, chat.owners[1].id].sort().join('-')
+        const friendId = sorted.replace(me.id, '').replace('-', '')
+        const friend = await core.localDB.get.user(friendId)
 
-        const sorted = [chat.owners[0].id,chat.owners[1].id].sort().join('-')
-        const friendId = sorted.replace(auth().currentUser.uid, '').replace('-', '')
-        const friend = realm.objects('User').filtered(`id == '${friendId}'`)[0]
-
-        const unsubscriber = database()
-          .ref(`chats/${sorted}/queues/${me.id}`).on('child_added', async snapshot => {
-            let resp = snapshot.val()
-            if (!resp) return
-            if (!Array.isArray(resp)) resp = [resp]
-            database().ref(`chats/${sorted}/queues/${me.id}`).set([]).then(() => console.log('Data set.'));
-            for (let msg of resp) {
-              const sha = await sha256(`${JSON.stringify(msg)}`)
-              realm.write(() => {
-                realm.create('ContentMessage', {
-                  id: sha,
-                  contentType: msg.content.type,
-                  value: msg.content.value.toString()
-                })
-                const content = realm.objects('ContentMessage').filtered(`id == '${sha}'`)[0]
-                realm.create('Message', {
-                  id: sha,
-                  from: friend,
-                  to: me,
-                  timestamp: Date(parseInt(msg.timestamp)),
-                  content: content
-                })
-                chat.messages = [...chat.messages, realm.objects('Message').filtered(`id == '${sha}'`)[0]]
-              })
-              setChats( [...realm.objects('Chat')] )
-            }
+        const unsub = await core.events.onMessageReceived({
+          chatName: sorted
+        }, (msg) => {
+          core.localDB.create.message({
+              content: msg.content,
+              from: friend,
+              to: me,
+              timestamp: msg.timestamp
           })
-        unsubs.push(unsubscriber)
+        })
+        unsubs.push(unsub)
       }
 
       return () => {
-        for (let unsub of unsubs) {
-          unsub() 
-        }
+        for (let unsub of unsubs) unsub()
         unsubs = []
       }
 
     }
 
-    try { run() } catch (e) { console.log(e) }
+    run()
 
   }, [])
 
@@ -126,7 +91,7 @@ const Home = ({ navigation }) => {
         >
           <Image
             style={styles.Perfil}
-            source={{ uri: myProfilePicture }}
+            source={{ uri: me.profilePicture }}
           />
         </TouchableOpacity>
         <Text style={styles.HeadText}>Chats</Text>
@@ -156,7 +121,7 @@ const Home = ({ navigation }) => {
               const content = chat.messages.length === 0 ? { type: `message`, value: `        ` } : lastMessage.content
               return (
                 <Chat
-                  yourUID={auth().currentUser.uid}
+                  yourUID={me.id}
                   key={chat.id}
                   picture={friend.profilePicture}
                   name={friend.name}
@@ -166,7 +131,7 @@ const Home = ({ navigation }) => {
                     setModalVisible(!modalVisible)
                   }}
                   onChatPress={async () => {
-                    navigation.push('Chat', { friendID: friend.id, chatName: [auth().currentUser.uid, friend.id].sort().join('-') })
+                    navigation.push('Chat', { friendID: friend.id, chatName: [me.id, friend.id].sort().join('-') })
                   }}
                 />
               )
@@ -176,7 +141,7 @@ const Home = ({ navigation }) => {
 
       </ScrollView>
 
-      
+
       <AdMobBanner
         adSize="fullBanner"
         adUnitID="ca-app-pub-3940256099942544/6300978111"

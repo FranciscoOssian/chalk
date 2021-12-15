@@ -14,15 +14,20 @@ import { Picker } from '@react-native-picker/picker';
 
 import firestore from '@react-native-firebase/firestore'
 import storage from '@react-native-firebase/storage';
-import { utils } from '@react-native-firebase/app';
-import auth from '@react-native-firebase/auth'
 
 import getRealm from '../../../../services/realm'
 
+import { useLocalUser } from '../../../../Hooks/localDatabase/user'
+
+import Core from '../../../../services/core'
+
+const core = new Core()
 
 let changeImage = false
 
 const EditProfile = ({ navigation }) => {
+
+    const { user } = useLocalUser()
 
     const [name, setName] = useState('')
     const [age, setAge] = useState(18)
@@ -30,16 +35,14 @@ const EditProfile = ({ navigation }) => {
     const [profileImageUri, setProfileImageUri] = useState('https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG')
 
     useEffect(() => {
-        const run  = async () => {
-            const realm = await getRealm()
-            const user = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+        const run = async () => {
             setName(user.name)
             setAge(user.age)
             setBio(user.bio)
             setProfileImageUri(user.profilePicture)
         }
         run()
-    }, [])
+    }, [user])
 
     const onHandleImageChange = () => {
         launchImageLibrary({
@@ -58,23 +61,25 @@ const EditProfile = ({ navigation }) => {
 
     const onHandleDone = async (userRecived) => {
         const realm = await getRealm()
-        const user = await realm.objects('User').filtered(`id == '${userRecived.id}'`)[0]
+
+        const me = core.localDB.get.myUser()
 
         let profilePicture = profileImageUri
 
-        if(changeImage){
-            const reference = storage().ref(`users/${auth().currentUser.uid}/profilePicture.jpg`);
+        if (changeImage) {
+            const reference = storage().ref(`users/${me.id}/profilePicture.jpg`);
             await reference.putFile(profilePicture);
             profilePicture = await reference.getDownloadURL()
         }
 
         realm.write(() => {
-            user.email = userRecived.email
-            user.name = userRecived.name
-            user.age = userRecived.age
-            user.bio = userRecived.bio
-            user.profilePicture = profilePicture
+            me.email = userRecived.email
+            me.name = userRecived.name
+            me.age = userRecived.age
+            me.bio = userRecived.bio
+            me.profilePicture = profilePicture
         });
+
         await editUserInFirebase({
             email: userRecived.email,
             name: userRecived.name,
@@ -83,6 +88,7 @@ const EditProfile = ({ navigation }) => {
             profilePicture: profilePicture,
             id: userRecived.id,
         })
+
     }
 
     return (
@@ -92,8 +98,8 @@ const EditProfile = ({ navigation }) => {
                     onPress={async () => {
                         navigation.push('Account')
                         onHandleDone({
-                            id: auth().currentUser.uid,
-                            email: auth().currentUser.email,
+                            id: user.id,
+                            email: user.email,
                             name: name,
                             bio: bio,
                             age: age

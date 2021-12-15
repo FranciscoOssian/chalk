@@ -17,35 +17,23 @@ import useAuth from '../../../../Hooks/Firebase/useAuth'
 
 import BackScreen from '../../../../../assests/images/global/navigation'
 
+import Core from '../../../../services/core'
+
+const core = new Core();
+
 const Account = ({ navigation }) => {
-
+    
     const [sended, setSended] = useState(false)
-
+    
     const [phoneNumber, setPhoneNumber] = useState('')
     const [code, setCode] = useState('');
-    const [confirm, setConfirm] = useState(null);
-
+    const [confirm, setConfirm] = useState()
+    
     const userAuth = useAuth()
-
+    
+    const { verifyPhoneNumber, confirmCode } = core.authPhoneNumber()
+    
     if(!userAuth.isSignedIn) return null
-
-    async function verifyPhoneNumber(phoneNumber) {
-        const confirmation = await auth().verifyPhoneNumber(phoneNumber);
-        setConfirm(confirmation);
-    }
-
-    async function confirmCode(confirm, code) {
-        try {
-          const credential = auth.PhoneAuthProvider.credential(confirm.verificationId, code);
-          await auth().currentUser.linkWithCredential(credential);
-        } catch (error) {
-          if (error.code == 'auth/invalid-verification-code') {
-            console.log('Invalid code.');
-          } else {
-            console.log('Account linking error');
-          }
-        }
-    }
 
     return (
         <ScrollView>
@@ -92,18 +80,18 @@ const Account = ({ navigation }) => {
                 <TouchableOpacity
                     onPress={ async () => {
                         Alert.alert('wait...')
-                        setSended(true)
-                        await verifyPhoneNumber(phoneNumber)
-                            .then( async () => {
-                                Alert.alert('code sent, check your messages')
-                                if(sended) {
-                                    Alert.alert('wait...')
-                                    await confirmCode(confirm, code)
-                                    Alert.alert('confirmed phone!')
-                                    navigation.navigate('Account')
-                                }
-                            } )
-                            .catch( e => console.log(e) )
+                        if(!sended){
+                            setSended(true)
+                            setConfirm( await verifyPhoneNumber(phoneNumber) )
+                            Alert.alert('code sent, check your messages')
+                        }
+                        else{
+                            Alert.alert('wait...')
+                            await confirmCode(confirm, code)
+                            Alert.alert('confirmed phone!')
+                            navigation.navigate('Account')
+
+                        }
                     }}
                 >
                     <Text

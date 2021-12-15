@@ -1,59 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, View, TextInput, ScrollView, TouchableOpacity } from 'react-native'
 
-import auth from '@react-native-firebase/auth'
-import useAuth from '../../../Hooks/Firebase/useAuth'
+import { useLocalUser } from '../../../Hooks/localDatabase/user'
 
-import getRealm from '../../../services/realm'
-
-import firestore from '@react-native-firebase/firestore';
+import Core from '../../../services/core'
+const core  = new Core();
 
 const SignUp = ({ navigation }) => {
+
+  const { user, update } = useLocalUser()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [secondPassword, setSecondPassword] = useState('')
 
-  const userAuth = useAuth()
-
   useEffect(() => {
     const run  = async () => {
-      if (userAuth?.user && userAuth.isSignedIn) navigation.navigate('Home')
+      if (user) navigation.navigate('Home')
     }
     run()
-  }, [userAuth])
+  }, [user])
 
   const testPassword = () => {
     if (password === '' && secondPassword === '') return false
     return password === secondPassword
   }
 
-  const saveUser = async (user) => {
-    const realm = await getRealm()
-    realm.write(() => {
-      realm.create('User', user)
-    })
-  }
-
   const onHandleSignUp = async (email, password) => {
-    try{
-      const userCredential = await auth().createUserWithEmailAndPassword(email, password)
-      navigation.navigate('Home')
-      const data = {
-        name: 'Anon',
-        age: 18,
-        email: email,
-        id: userCredential.user.uid,
-        bio: '',
-        profilePicture: ''
-      }
-      await saveUser(data)
-      await firestore().collection('Users').doc(userCredential.user.uid).set(data)
-    }
-    catch(e){
-      console.log(e)
-    }
-
+    await core.signUp(email, password)
+    update( await core.localDB.get.myUser() )
+    navigation.navigate('Home')
   }
 
   return (
