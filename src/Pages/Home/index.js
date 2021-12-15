@@ -24,6 +24,8 @@ import firstTimeOpenApp from './utils/getMessagesWithFirebase'
 import Core from '../../services/core'
 import myDebug from '../../utils/debug/index'
 
+import { useLocalUser } from '../../Hooks/localDatabase/user'
+
 const core = new Core();
 const debug = (...p) => myDebug('pages/Home/index.js', p)
 let unsubs = []
@@ -32,19 +34,15 @@ const Home = ({ navigation }) => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modelImageSelected, setModalImageSelected] = useState('');
-
-  const [myProfilePicture, setMyProfilePicture] = useState('https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG')
   const [chats, setChats] = useState([])
   const [flag, setFlag] = useState(false)
+
+  const { user: me } = useLocalUser()
 
   useEffect(() => {
     const run = async () => {
       const realm = await core.localDB.databases.realm
-      const me = await core.localDB.get.myUser()
       if (!me) return setFlag(!flag)
-      try {
-        setMyProfilePicture(me.profilePicture)
-      } catch (e) { console.log(e) }
       if ((await AsyncStorage.getItem('firstTimeOpenApp')) !== 'false') await firstTimeOpenApp()
       setChats(realm.objects('Chat'))
       await AsyncStorage.setItem('firstTimeOpenApp', 'false')
@@ -54,10 +52,9 @@ const Home = ({ navigation }) => {
 
   useEffect(() => {
     const run = async () => {
-      const me = await core.localDB.get.myUser()
       for (let chat of chats) {
         const sorted = [chat.owners[0].id, chat.owners[1].id].sort().join('-')
-        const friendId = sorted.replace(auth().currentUser.uid, '').replace('-', '')
+        const friendId = sorted.replace(me.id, '').replace('-', '')
         const friend = await core.localDB.get.user(friendId)
 
         const unsub = await core.events.onMessageReceived({
@@ -94,7 +91,7 @@ const Home = ({ navigation }) => {
         >
           <Image
             style={styles.Perfil}
-            source={{ uri: myProfilePicture }}
+            source={{ uri: me.profilePicture }}
           />
         </TouchableOpacity>
         <Text style={styles.HeadText}>Chats</Text>
@@ -124,7 +121,7 @@ const Home = ({ navigation }) => {
               const content = chat.messages.length === 0 ? { type: `message`, value: `        ` } : lastMessage.content
               return (
                 <Chat
-                  yourUID={auth().currentUser.uid}
+                  yourUID={me.id}
                   key={chat.id}
                   picture={friend.profilePicture}
                   name={friend.name}
@@ -134,7 +131,7 @@ const Home = ({ navigation }) => {
                     setModalVisible(!modalVisible)
                   }}
                   onChatPress={async () => {
-                    navigation.push('Chat', { friendID: friend.id, chatName: [auth().currentUser.uid, friend.id].sort().join('-') })
+                    navigation.push('Chat', { friendID: friend.id, chatName: [me.id, friend.id].sort().join('-') })
                   }}
                 />
               )

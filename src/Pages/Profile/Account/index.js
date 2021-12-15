@@ -8,17 +8,17 @@ import {
     ScrollView
 } from 'react-native'
 
-import { launchImageLibrary } from 'react-native-image-picker'
-
-import getRealm from '../.././../services/realm'
-
 import BackScreen from '../../../../assests/images/global/navigation'
 
 import { Row, Rows } from '../../../Components/Rows'
 
 import auth from '@react-native-firebase/auth'
 
+import { useLocalUser } from '../../../Hooks/localDatabase/user'
+
 const Account = ({ navigation }) => {
+
+    const { user } = useLocalUser()
 
     const [name, setName] = useState('')
     const [age, setAge] = useState(18)
@@ -27,9 +27,6 @@ const Account = ({ navigation }) => {
 
     useEffect(() => {
         const run = async () => {
-            const realm = await getRealm()
-            const user = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
-            console.log(user)
             setName(user.name)
             setAge(user.age)
             setBio(user.bio)

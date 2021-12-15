@@ -1,9 +1,10 @@
-import auth from '@react-native-firebase/auth'
-import database from '@react-native-firebase/database'
 import { sha256 } from 'react-native-sha256';
-import storage from '@react-native-firebase/storage';
 import ImageResizer from 'react-native-image-resizer';
 import RNFetchBlob from 'rn-fetch-blob'
+import firestore from '@react-native-firebase/firestore'
+import database from '@react-native-firebase/database'
+import auth from '@react-native-firebase/auth'
+import storage from '@react-native-firebase/storage';
 
 import getRealm from '../realm'
 
@@ -12,8 +13,11 @@ const debug = (...p) => myDebug('services/core/index.js', p)
 
 export default class Core {
     constructor() {
-        this.auth = {
-            ...auth
+        this.cloudAuth = {
+            auth: auth,
+            create: {
+                user: async (email, password) => auth().createUserWithEmailAndPassword(email, password)
+            },
         };
         this.cloudStore = {
             databases: {
@@ -34,8 +38,18 @@ export default class Core {
                                 timestamp: Date.now(),
                             }])
                         });
+                },
+                user: async (user) => {
+                    firestore().collection('Users').doc(user.id).set(user)
                 }
             },
+            get: {
+                user: async (id) => {
+                    return (
+                        await firestore().collection('Users').doc(id).get()
+                    ).data()
+                }
+            }
         };
         this.localDB = {
             databases: {
@@ -44,7 +58,7 @@ export default class Core {
             get: {
                 myUser: async () => {
                     const realm = await getRealm();
-                    const me = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+                    const me = await realm.objects('User').filtered(`id == '${auth().currentUser?.uid}'`)[0]
                     return me;
                 },
                 user: async (id) => {
@@ -66,7 +80,7 @@ export default class Core {
                     const chatName = [message.from.id, message.to.id].sort().join('-')
                     const realm = await this.localDB.databases.realm;
                     const sha = await sha256(`${JSON.stringify(message)}`)
-                    realm.write( () => {
+                    realm.write(() => {
                         realm.create('ContentMessage', {
                             id: sha,
                             contentType: message.content.type,
@@ -80,13 +94,21 @@ export default class Core {
                             timestamp: Date(parseInt(message.timestamp)),
                             content: content
                         })
-                        const chat  = realm.objects('Chat').filtered(`id == '${chatName}'`)[0]
+                        const chat = realm.objects('Chat').filtered(`id == '${chatName}'`)[0]
                         chat.messages = [...chat.messages, realm.objects('Message').filtered(`id == '${sha}'`)[0]]
                     })
                     return realm.objects('Message').filtered(`id == '${sha}'`)[0]
                 },
-                user: (user) => { },
-                chat: (chat) => { },
+                user: async (user) => {
+                    const realm = await this.localDB.databases.realm;
+                    realm.write(() => realm.create('User', user))
+                },
+                chat: async (chat) => {
+                    const realm = await this.localDB.databases.realm;
+                    realm.write(() => {
+                        realm.create('Chat', chat)
+                    })
+                },
                 image: async (url) => {
                     return ImageResizer.createResizedImage(
                         url,
@@ -104,7 +126,26 @@ export default class Core {
                 message: (id) => { },
                 friend: (id) => { },
                 chat: (id) => { }
+            },
+            update: {
+                myUser: async (config) => {
+                    const realm = await getRealm();
+                    if (!config) return
+                    realm.write(() => {
+                        this.localDB.get.myUser().then(me => {
+                            const result = Object.keys(config).map(
+                                (key) => {
+                                    return { key: key, value: me[key] }
+                                }
+                            )
+                            for (i of result) {
+                                me[i.key] = i.value
+                            }
+                        })
+                    })
+                }
             }
+
         };
         this.events = {
             onMessageReceived: async (config, callback) => {
@@ -125,10 +166,44 @@ export default class Core {
         }
     }
 
+    authPhoneNumber() {
+
+        async function verifyPhoneNumber(phone) {
+            return auth().verifyPhoneNumber(phone);
+        }
+        async function confirmCode(confirm, code) {
+            const credential = auth.PhoneAuthProvider.credential(confirm.verificationId, code);
+            await auth().currentUser.linkWithCredential(credential);
+        }
+
+
+        return { verifyPhoneNumber, confirmCode }
+    }
+
+    async signUp(email, password) {
+        const userCredential = await this.cloudAuth.create.user(email, password)
+        const data = {
+            name: 'Anon',
+            age: 18,
+            email: email,
+            id: userCredential.user.uid,
+            bio: '',
+            profilePicture: 'https://firebasestorage.googleapis.com/v0/b/chatalk-96c5b.appspot.com/o/public%2FdefaultProfilePicture.jpg?alt=media&token=ac1c66c3-903e-482b-8cce-4d945b2159c1'
+        }
+        this.localDB.create.user(data)
+        await this.cloudStore.create.user(data)
+    }
+
+    async signIn(email, password) {
+        const userCredentials = await auth().signInWithEmailAndPassword(email, password)
+        const myUser = await this.cloudStore.get.user(userCredentials.user.uid)
+        await this.localDB.create.user(myUser)
+    }
+
     async sendMessage(message) {
 
         if (message.content.value === '') return
-        
+
         const sha = await sha256(`${JSON.stringify(message)}${Date.now()}`)
         const chatName = [auth().currentUser.uid, message.to.id].sort().join('-')
 
@@ -166,7 +241,7 @@ export default class Core {
             ...msg,
             content: {
                 type: message.content.type,
-                value: message.content.type === 'image'? newUri.uri : message.content.value
+                value: message.content.type === 'image' ? newUri.uri : message.content.value
             }
         }
 

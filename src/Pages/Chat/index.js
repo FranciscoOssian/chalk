@@ -11,7 +11,6 @@ import {
 } from 'react-native'
 
 import { launchImageLibrary } from 'react-native-image-picker';
-import auth from '@react-native-firebase/auth'
 
 import BackScreen from '../../../assests/images/global/navigation'
 import VideoCall from '../../../assests/images/global/videoCall'
@@ -24,27 +23,27 @@ import Message from './Components/Message'
 import myDebug from '../../utils/debug/index'
 import Core from '../../services/core'
 
+import { useLocalUser } from '../../Hooks/localDatabase/user'
+
 const core = new Core()
 const debug = (...p) => myDebug('pages/Chat/index.js', p)
 
 const Chat = ({ route, navigation }) => {
+
+  const { user: me } = useLocalUser()
 
   const scrollViewRef = useRef();
   const { friendID } = route.params;
   const [friend, setFriend] = useState({
     profilePicture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg'
   });
-  const [myUser, setMyUser] = useState({
-    profilePicture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg'
-  })
   const [messages, setMessages] = useState([])
   const [inputMessage, setInputMessage] = useState({ type: '', value: '' })
   const [flagRender, setFlagRender] = useState(false)
 
   useEffect(() => {
     const run = async () => {
-      const chatName = [auth().currentUser.uid, friendID].sort().join('-')
-      setMyUser(await core.localDB.get.myUser())
+      const chatName = [me.id, friendID].sort().join('-')
       setFriend(await core.localDB.get.user(friendID))
       const { messages } = await core.localDB.get.chat(chatName)
       setMessages(messages)
@@ -54,7 +53,7 @@ const Chat = ({ route, navigation }) => {
 
   useEffect(() => {
     const run = async () => {
-      const chatName = [auth().currentUser.uid, friendID].sort().join('-')
+      const chatName = [me.id, friendID].sort().join('-')
       const { messages } = await core.localDB.get.chat(chatName)
       setMessages(messages)
     }
@@ -67,7 +66,7 @@ const Chat = ({ route, navigation }) => {
         type: message.type,
         value: message.value
       },
-      from: await core.localDB.get.myUser(),
+      from: me,
       to: await core.localDB.get.user(friendID)
     })
     setFlagRender(!flagRender)
@@ -129,11 +128,11 @@ const Chat = ({ route, navigation }) => {
 
         <View style={styles.startChat}>
           <Image
-            source={{ uri: myUser.profilePicture }}
+            source={{ uri: me.profilePicture }}
             style={{ width: 100, height: 100, borderRadius: 100 }}
           />
-          <Text style={[styles.startChatPersonName, styles.fontfont]}>{myUser.name}</Text>
-          <Text style={[styles.startChatDescription, styles.font]}>You’re on Chat</Text>
+          <Text style={[styles.startChatPersonName, styles.fontfont]}>{me.name}</Text>
+          <Text style={[styles.startChatDescription, styles.font]}>You're on Chat</Text>
           <View style={styles.newFriend}>
             <View style={styles.imageDuo}>
               <Image
@@ -141,7 +140,7 @@ const Chat = ({ route, navigation }) => {
                 style={[styles.imageDuoImage, { left: 7.5 }]}
               />
               <Image
-                source={{ uri: myUser.profilePicture }}
+                source={{ uri: me.profilePicture }}
                 style={[styles.imageDuoImage, { left: -7.5 }]}
               />
             </View>
@@ -163,7 +162,7 @@ const Chat = ({ route, navigation }) => {
                       timestamp={message.timestamp}
                       content={message.content}
                       profilePicture={message.from.profilePicture}
-                      yourUID={myUser.id}
+                      yourUID={me.id}
                     />
                   </TouchableOpacity>
                   {useSpace ? <View style={{ width: '100%', height: 30 }}></View> : <></>}

@@ -13,7 +13,7 @@ const useAuth = () => {
     )
 
     useEffect(() => {
-        const subscriber = auth().onAuthStateChanged(
+        auth().onAuthStateChanged(
             user => setAuthState(
                 {
                     user,
@@ -22,7 +22,6 @@ const useAuth = () => {
                 }
             )
         );
-        return subscriber;
     }, []);
 
 
