@@ -27,17 +27,27 @@ const SearchPeron = ({ navigation }) => {
 
         const chatName = [me.id, userMatched.user.id].sort().join('-')
 
+        console.log(userMatched)
+
         const friendInDb = await core.localDB.get.user(userMatched.user.id)
+
+        console.log(friendInDb)
 
         if (!friendInDb) {
 
           const userSnapshot = await firestore().collection('Users').doc(userMatched.user.id).get();
           const user = userSnapshot.data()
 
+          console.log(user)
+
           core.localDB.create.user({
             ...user,
-            age: parseInt(user.age)
+            age: parseInt(user.age),
+            id: userMatched.user.id
           })
+
+          console.log( await core.localDB.get.user( userMatched.user.id ) )
+
           core.localDB.create.chat({
             id: chatName,
             owners: [me, await core.localDB.get.user(userMatched.user.id)],
@@ -47,22 +57,20 @@ const SearchPeron = ({ navigation }) => {
           let friends = []
           let friendsSnapShot = await firestore().collection('Users').doc(`${me.id}`).collection('friends').doc('friends').get()
           if (!friendsSnapShot.exists) {
-            friends = [friend.id]
+            friends = [userMatched.user.id]
             await firestore().collection('Users').doc(me.id).collection(`friends`).doc(`friends`).set({
               friends
             })
           }
-          else {
-            friends = friendsSnapShot.data().friends
-          }
+          else friends = friendsSnapShot.data().friends
 
-          if (friends.indexOf(friend.id) === -1) {
+          if (friends.indexOf(userMatched.user.id) === -1) {
             await firestore().collection('Users').doc(`${me.id}`).collection('friends').doc('friends').update({
-              friends: [...friends, friend.id]
+              friends: [...friends, userMatched.user.id]
             })
           }
 
-          navigation.push('Chat', { friendID: user.id, chatName })
+          navigation.push('Chat', { friendID: userMatched.user.id, chatName })
 
         }
         else {

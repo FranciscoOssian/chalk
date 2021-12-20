@@ -27,7 +27,7 @@ let changeImage = false
 
 const EditProfile = ({ navigation }) => {
 
-    const { user } = useLocalUser()
+    const { user, update: updateUserContext } = useLocalUser()
 
     const [name, setName] = useState('')
     const [age, setAge] = useState(18)
@@ -50,43 +50,36 @@ const EditProfile = ({ navigation }) => {
         }, result => {
             if (result.didCancel || result.errorCode) return
             setProfileImageUri(result.assets[0].uri)
+            console.log("ddddddddddd", result.assets[0].uri)
             changeImage = true
         })
     }
 
-    const editUserInFirebase = async (user) => {
-        firestore().collection('Users').doc(user.id)
-            .set(user)
+    const editUserInCloud = async (user) => {
+        core.cloudStore.update.myUser(user)
     }
 
     const onHandleDone = async (userRecived) => {
-        const realm = await getRealm()
-
-        const me = core.localDB.get.myUser()
 
         let profilePicture = profileImageUri
 
         if (changeImage) {
-            const reference = storage().ref(`users/${me.id}/profilePicture.jpg`);
-            await reference.putFile(profilePicture);
-            profilePicture = await reference.getDownloadURL()
+            profilePicture = await core.cloudStore.update.myProfilePicture(profilePicture)
         }
 
-        realm.write(() => {
-            me.email = userRecived.email
-            me.name = userRecived.name
-            me.age = userRecived.age
-            me.bio = userRecived.bio
-            me.profilePicture = profilePicture
-        });
-
-        await editUserInFirebase({
+        await updateUserContext({
             email: userRecived.email,
             name: userRecived.name,
             age: userRecived.age,
             bio: userRecived.bio,
-            profilePicture: profilePicture,
-            id: userRecived.id,
+            profilePicture: profilePicture
+        })
+        await editUserInCloud({
+            email: userRecived.email,
+            name: userRecived.name,
+            age: userRecived.age,
+            bio: userRecived.bio,
+            profilePicture: profilePicture
         })
 
     }
@@ -98,7 +91,6 @@ const EditProfile = ({ navigation }) => {
                     onPress={async () => {
                         navigation.push('Account')
                         onHandleDone({
-                            id: user.id,
                             email: user.email,
                             name: name,
                             bio: bio,

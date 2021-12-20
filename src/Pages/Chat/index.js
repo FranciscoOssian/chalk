@@ -43,10 +43,7 @@ const Chat = ({ route, navigation }) => {
 
   useEffect(() => {
     const run = async () => {
-      const chatName = [me.id, friendID].sort().join('-')
       setFriend(await core.localDB.get.user(friendID))
-      const { messages } = await core.localDB.get.chat(chatName)
-      setMessages(messages)
     }
     run()
   }, [])
@@ -61,6 +58,7 @@ const Chat = ({ route, navigation }) => {
   }, [flagRender])
 
   const onHandleMessageSend = async (message) => {
+    console.log(message)
     await core.sendMessage({
       content: {
         type: message.type,

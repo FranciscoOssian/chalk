@@ -27,6 +27,9 @@ const SignUp = ({ navigation }) => {
   }
 
   const onHandleSignUp = async (email, password) => {
+    setEmail('')
+    setPassword('')
+    setSecondPassword('')
     await core.signUp(email, password)
     update( await core.localDB.get.myUser() )
     navigation.navigate('Home')

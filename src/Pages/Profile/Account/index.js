@@ -16,6 +16,12 @@ import auth from '@react-native-firebase/auth'
 
 import { useLocalUser } from '../../../Hooks/localDatabase/user'
 
+import Core from '../../../services/core'
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const core = new Core()
+
 const Account = ({ navigation }) => {
 
     const { user } = useLocalUser()
@@ -63,8 +69,11 @@ const Account = ({ navigation }) => {
                 />
                 <Row
                     name='LogOut Account'
-                    onPress={ () => {
-                        auth().signOut().then(() => navigation.navigate('SignUp') );
+                    onPress={ async () => {
+                        await auth().signOut()
+                        await AsyncStorage.setItem('firstTimeOpenApp', 'true')
+                        await core.localDB.delete.allDataBase()
+                        navigation.navigate('SignIn')
                     }}
                 />
             </Rows>

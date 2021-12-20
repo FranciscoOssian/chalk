@@ -13,7 +13,7 @@ const useAuth = () => {
     )
 
     useEffect(() => {
-        auth().onAuthStateChanged(
+        return auth().onAuthStateChanged(
             user => setAuthState(
                 {
                     user,

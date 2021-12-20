@@ -17,6 +17,7 @@ import {
 } from 'react-native-admob-alpha'
 
 import Chat from './Components/Chat'
+import PushNotification from "react-native-push-notification";
 import Story from './Components/Story'
 import SearchSvgComponent from '../../../assests/images/pages/Home/Search'
 
@@ -36,14 +37,20 @@ const Home = ({ navigation }) => {
   const [modelImageSelected, setModalImageSelected] = useState('');
   const [chats, setChats] = useState([])
   const [flag, setFlag] = useState(false)
+  const [flagLoadMessages, setFlagLoadMessages] = useState(false)
 
   const { user: me } = useLocalUser()
 
   useEffect(() => {
     const run = async () => {
       const realm = await core.localDB.databases.realm
+
+      console.log('aaaaaaaaaaaaa')
       if (!me) return setFlag(!flag)
-      if ((await AsyncStorage.getItem('firstTimeOpenApp')) !== 'false') await firstTimeOpenApp()
+      if ((await AsyncStorage.getItem('firstTimeOpenApp')) !== 'false') {
+        await firstTimeOpenApp()
+        setFlagLoadMessages(!flagLoadMessages)
+      }
       setChats(realm.objects('Chat'))
       await AsyncStorage.setItem('firstTimeOpenApp', 'false')
     }
@@ -51,21 +58,31 @@ const Home = ({ navigation }) => {
   }, [flag])
 
   useEffect(() => {
-    const run = async () => {
+    const loadMessages = async () => {
+      if ((await AsyncStorage.getItem('firstTimeOpenApp')) !== 'false') return
+
       for (let chat of chats) {
         const sorted = [chat.owners[0].id, chat.owners[1].id].sort().join('-')
         const friendId = sorted.replace(me.id, '').replace('-', '')
         const friend = await core.localDB.get.user(friendId)
 
+        debug('checking for new message on chat: ', sorted)
+
         const unsub = await core.events.onMessageReceived({
           chatName: sorted
         }, (msg) => {
-          core.localDB.create.message({
-              content: msg.content,
-              from: friend,
-              to: me,
-              timestamp: msg.timestamp
+          core.receiveMessage({
+            content: msg.content,
+            from: friend,
+            to: me,
+            timestamp: msg.timestamp
           })
+          PushNotification.localNotification({
+            title: friend.name,
+            message: msg.content.type === 'image' ? 'image' : msg.content.value,
+            date: new Date(Date.now() + 60 * 1000),
+            channelId: "messages",
+         });
         })
         unsubs.push(unsub)
       }
@@ -77,8 +94,9 @@ const Home = ({ navigation }) => {
 
     }
 
-    run()
+    loadMessages()
 
+  //}, [flagLoadMessages])
   }, [])
 
 

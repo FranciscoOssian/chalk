@@ -21,8 +21,9 @@ export default class Core {
         };
         this.cloudStore = {
             databases: {
-                firebaseCloudStore: storage,
-                realTimeDataBase: database
+                files: storage,
+                complex: firestore,
+                realTime: database
             },
             create: {
                 message: async (message) => {
@@ -48,6 +49,38 @@ export default class Core {
                     return (
                         await firestore().collection('Users').doc(id).get()
                     ).data()
+                },
+                friends: async (userID) => {
+                    const snapshot = await firestore().collection('Users').doc(`${userID}`).collection('friends').doc('friends').get()
+                    let friends = snapshot.data()?.friends
+                    if( !Array.isArray(friends) ){
+                        return [friends]
+                    }
+                    else return friends
+                }
+            },
+            update: {
+                myUser: async (user) => {
+                    if (!this.cloudAuth.auth().currentUser) return
+                    return this.cloudStore.databases.complex()
+                        .collection('Users').doc(
+                            this.cloudAuth.auth().currentUser.uid
+                        ).set(user)
+                },
+                myProfilePicture: async (new_path) => {
+                    if (!this.cloudAuth.auth().currentUser) return
+                    const ref = storage().ref(`users/${this.cloudAuth.auth().currentUser.uid}/profilePicture.jpg`)
+                    await ref.putFile(new_path)
+                    return await ref.getDownloadURL()
+                }
+            },
+            delete: {
+                messageImage: (path) => {
+                    let fields = path.split('%2F')
+                    const chatName = fields[1]
+                    const ownerQueue = fields[2]
+                    const fileName = fields[3].split('?alt')[0]
+                    storage().ref(`chats/${chatName}/${ownerQueue}/${fileName}`).delete()
                 }
             }
         };
@@ -67,7 +100,7 @@ export default class Core {
                     return friend;
                 },
                 chat: async (id) => {
-                    const realm = await this.localDB.databases.realm;
+                    const realm = await getRealm();
                     return realm.objects('Chat').filtered(`id == '${id}'`)[0]
                 },
                 message: async (id) => {
@@ -80,6 +113,8 @@ export default class Core {
                     const chatName = [message.from.id, message.to.id].sort().join('-')
                     const realm = await this.localDB.databases.realm;
                     const sha = await sha256(`${JSON.stringify(message)}`)
+                    const prev = realm.objects('Message').filtered(`id == '${sha}'`)[0]
+                    if (prev) return prev
                     realm.write(() => {
                         realm.create('ContentMessage', {
                             id: sha,
@@ -101,50 +136,80 @@ export default class Core {
                 },
                 user: async (user) => {
                     const realm = await this.localDB.databases.realm;
+                    const prev = realm.objects('User').filtered(`id == '${user.id}'`)[0]
+                    if (prev) return prev
                     realm.write(() => realm.create('User', user))
                 },
                 chat: async (chat) => {
                     const realm = await this.localDB.databases.realm;
+                    const prev = realm.objects('Chat').filtered(`id == '${chat.id}'`)[0]
+                    if (prev) return prev
                     realm.write(() => {
                         realm.create('Chat', chat)
                     })
                 },
                 image: async (url) => {
-                    return ImageResizer.createResizedImage(
-                        url,
-                        600,
-                        600,
-                        'PNG',
-                        100,
-                        0,
-                        RNFetchBlob.fs.dirs.PictureDir + '/Chatalk'
-                    )
+                    if (url.includes('https://')) {
+                        console.log(RNFetchBlob.fs.dirs.PictureDir + '/Chatalk')
+                        const res = await RNFetchBlob.config({
+                            fileCache: true,
+                            path : RNFetchBlob.fs.dirs.PictureDir + '/Chatalk/' + await sha256(url) + '.png'
+                        }).fetch('GET', url)
+                        return 'file://' + res.path()
+                    }
+                    else{
+                        return ImageResizer.createResizedImage(
+                            url,
+                            600,
+                            600,
+                            'PNG',
+                            100,
+                            0,
+                            RNFetchBlob.fs.dirs.PictureDir + '/Chatalk'
+                        )
+                    }
                 }
             },
             delete: {
                 myUser: () => { },
                 message: (id) => { },
                 friend: (id) => { },
-                chat: (id) => { }
+                chat: (id) => { },
+                allDataBase: async () => {
+                    const realm = await getRealm();
+                    realm.write(() => {
+                        const arr = [
+                            realm.objects('Chat'),
+                            realm.objects('User'),
+                            realm.objects('Message'),
+                            realm.objects('ContentMessage'),
+                        ]
+                        for (let realmList of arr) {
+                            for (let realmObj of realmList) {
+                                realm.delete(realmObj)
+                            }
+                        }
+                    })
+                }
             },
             update: {
                 myUser: async (config) => {
-                    const realm = await getRealm();
                     if (!config) return
+                    const realm = await getRealm();
+                    const me = await this.localDB.get.myUser()
                     realm.write(() => {
-                        this.localDB.get.myUser().then(me => {
-                            const result = Object.keys(config).map(
-                                (key) => {
-                                    return { key: key, value: me[key] }
-                                }
-                            )
-                            for (i of result) {
-                                me[i.key] = i.value
+                        const result = Object.keys(config).map(
+                            (key) => {
+                                return { key: key, value: config[key] }
                             }
-                        })
+                        )
+                        for (let i of result) {
+                            me[i.key] = i.value
+                        }
                     })
                 }
             }
+
 
         };
         this.events = {
@@ -158,8 +223,9 @@ export default class Core {
                             if (!resp) return
                             if (!Array.isArray(resp)) resp = [resp]
                             database().ref(chatPath).set([]).then(() => console.log('Data set.'));
+                            debug(resp)
                             for (let msg of resp) {
-                                callback(msg)
+                                callback(msg) 
                             }
                         })
             }
@@ -180,6 +246,32 @@ export default class Core {
         return { verifyPhoneNumber, confirmCode }
     }
 
+    async receiveMessage(message) {
+
+        let value = message.content.value
+        
+        if (message.content.type === 'image'){
+            const rnfb = RNFetchBlob
+            const picDir = rnfb.fs.dirs.PictureDir
+            const folders = await rnfb.fs.ls(picDir)
+            const found = folders.find(folder => folder === 'Chatalk');
+            if (!found) await rnfb.fs.mkdir(picDir + '/Chatalk')
+            
+            value = await this.localDB.create.image(message.content.value)
+            this.cloudStore.delete.messageImage(message.content.value)
+        }
+
+        await this.localDB.create.message({
+            content: {
+                value: value,
+                type: message.content.type
+            },
+            from: message.from,
+            to: message.to,
+            timestamp: message.timestamp
+        })
+    }
+
     async signUp(email, password) {
         const userCredential = await this.cloudAuth.create.user(email, password)
         const data = {
@@ -197,7 +289,10 @@ export default class Core {
     async signIn(email, password) {
         const userCredentials = await auth().signInWithEmailAndPassword(email, password)
         const myUser = await this.cloudStore.get.user(userCredentials.user.uid)
-        await this.localDB.create.user(myUser)
+        await this.localDB.create.user({
+            ...myUser,
+            id: userCredentials.user.uid,
+        })
     }
 
     async sendMessage(message) {
@@ -207,17 +302,18 @@ export default class Core {
         const sha = await sha256(`${JSON.stringify(message)}${Date.now()}`)
         const chatName = [auth().currentUser.uid, message.to.id].sort().join('-')
 
-        //try{
-        //  RNFetchBlob.fs.mkdir(RNFetchBlob.fs.dirs.PictureDir + '/Chatalk')
-        //}
-        //catch(e){}
+        const rnfb = RNFetchBlob
+        const picDir = rnfb.fs.dirs.PictureDir
+        const folders = await rnfb.fs.ls(picDir)
+        const found = folders.find(folder => folder === 'Chatalk');
+        if (!found) await rnfb.fs.mkdir(picDir + '/Chatalk')
 
         let reference
         let newUri
 
         if (message.content.type === 'image') {
             newUri = await this.localDB.create.image(message.content.value)
-            reference = storage().ref(`chats/${chatName}/${message.to.id}/${sha}.png`);
+            reference = storage().ref(`chats/${chatName}/${message.to.id}/${sha}.png`)
             await reference.putFile(newUri.uri)
         }
 

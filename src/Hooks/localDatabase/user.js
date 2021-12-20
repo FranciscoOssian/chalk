@@ -17,7 +17,6 @@ function useLocalUserProvider() {
     useEffect(() => {
         const run  = async () => {
             const resp = await core.localDB.get.myUser()
-            debug('setting user to useProvider... user id:', resp?.id)
             setUser( resp )
         }
         run()
