@@ -10,20 +10,21 @@ import {
     Alert
 } from 'react-native'
 
-
-import auth from '@react-native-firebase/auth';
-
 import useAuth from '../../../../Hooks/Firebase/useAuth'
 
 import BackScreen from '../../../../../assests/images/global/navigation'
 
 import Core from '../../../../services/core'
 
+import { useLocalUser } from '../../../../Hooks/localDatabase/user'
+
 const core = new Core();
 
 const Account = ({ navigation }) => {
     
     const [sended, setSended] = useState(false)
+
+    const { user: me } = useLocalUser()
     
     const [phoneNumber, setPhoneNumber] = useState('')
     const [code, setCode] = useState('');
@@ -44,7 +45,7 @@ const Account = ({ navigation }) => {
                 ><BackScreen />
                 </TouchableOpacity>
                 <Image
-                    source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG' }}
+                    source={{ uri: me.profilePicture }}
                     style={{ width: 100, height: 100, borderRadius: 100 }}
                 />
             </View>

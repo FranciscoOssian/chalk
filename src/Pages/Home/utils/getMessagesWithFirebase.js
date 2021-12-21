@@ -4,6 +4,10 @@ import Core from '../../../services/core'
 
 const core = new Core()
 
+import myDebug from '../../../utils/debug'
+
+const debug = (...p) => myDebug('pages/Home/utils/.js', p)
+
 export default async function () {
 
     const me = await core.localDB.get.myUser()

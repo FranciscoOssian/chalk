@@ -134,7 +134,7 @@ const Home = ({ navigation }) => {
           chats.map(
             chat => {
               const lastMessage = [...chat.messages].pop()
-              const friend = chat.owners.filter(user => user.id !== auth().currentUser.uid)[0]
+              const friend = chat.owners.filter(user => user.id !== core.localDB.get.myUser()?.id)[0]
               const timestamp = chat.messages.length === 0 ? new Date() : lastMessage.timestamp
               const content = chat.messages.length === 0 ? { type: `message`, value: `        ` } : lastMessage.content
               return (
@@ -170,7 +170,7 @@ const Home = ({ navigation }) => {
 
       <View style={{ height: 76, width: '100%', alignItems: 'center' }}>
         <SearchSvgComponent
-          onPress={() => navigation.navigate('SearchPerson')}
+          onPress={() => navigation.push('SearchPerson')}
           primaryColor="#0584FE"
           secondaryColor="rgb(255,255,255)"
         />

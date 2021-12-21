@@ -53,6 +53,7 @@ export default class Core {
                 friends: async (userID) => {
                     const snapshot = await firestore().collection('Users').doc(`${userID}`).collection('friends').doc('friends').get()
                     let friends = snapshot.data()?.friends
+                    if(!friends) return []
                     if( !Array.isArray(friends) ){
                         return [friends]
                     }
