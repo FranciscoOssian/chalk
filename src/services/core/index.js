@@ -288,12 +288,23 @@ export default class Core {
     }
 
     async signIn(email, password) {
-        const userCredentials = await auth().signInWithEmailAndPassword(email, password)
+        let userCredentials
+        try{
+            userCredentials = await auth().signInWithEmailAndPassword(email, password)
+        }
+        catch(e){
+            return {error: {
+                code: e.code,
+                message: e.message.replace(`[${e.code}]`, '')
+            }}
+        }
         const myUser = await this.cloudStore.get.user(userCredentials.user.uid)
         await this.localDB.create.user({
             ...myUser,
             id: userCredentials.user.uid,
         })
+
+        return userCredentials
     }
 
     async sendMessage(message) {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, StyleSheet, View, TextInput, ScrollView, Button, TouchableOpacity } from 'react-native'
+import { Text, StyleSheet, View, TextInput, ScrollView, Button, TouchableOpacity, Alert } from 'react-native'
 
 import Core from '../../../services/core'
 
@@ -24,7 +24,12 @@ const SignIn = ({ navigation }) => {
   const onHandleSignIn = async (email, password) => {
     setEmail('')
     setPassword('')
-    await core.signIn(email, password)
+    const resp = await core.signIn(email, password)
+    if(resp.error){
+      console.log(resp.error)
+      Alert.alert(resp.error.code, resp.error.message)
+      return
+    }
     update( await core.localDB.get.myUser() )
     navigation.navigate('Home')
   }
