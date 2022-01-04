@@ -1,45 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { Text, StyleSheet, View, TextInput, ScrollView, Button, TouchableOpacity } from 'react-native'
+import { Text, StyleSheet, View, TextInput, ScrollView, Button, TouchableOpacity, Alert } from 'react-native'
 
-import useAuth from '../../../Hooks/Firebase/useAuth'
+import Core from '../../../services/core'
 
-import auth from '@react-native-firebase/auth'
-import firestore from '@react-native-firebase/firestore';
+import { useLocalUser } from '../../../Hooks/localDatabase/user'
 
-import getRealm from '../../../services/realm'
+const core = new Core()
 
 const SignIn = ({ navigation }) => {
-
-  const userAuth = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
+  const { update, user } = useLocalUser()
+
   useEffect(() => {
     const run  = async () => {
-      if (userAuth?.user && userAuth.isSignedIn) navigation.navigate('Home')
+      if (user) navigation.navigate('Home')
     }
     run()
-  }, [userAuth])
-
-  const saveUser = async (user) => {
-    const realm = await getRealm()
-    realm.write( () => {
-       realm.create('User', user)
-    } )
-  }
+  }, [user])
 
   const onHandleSignIn = async (email, password) => {
-    try{
-      const userCredentials = await auth().signInWithEmailAndPassword(email, password)
-      const documentSnapshot = await firestore().collection('Users').doc(userCredentials.user.uid).get()
-      const myData = documentSnapshot.data()
-      console.log(myData)
-      await saveUser(myData)
-      console.log(myData)
-    }catch(e){
-      console.log('erorror',e)
+    setEmail('')
+    setPassword('')
+    const resp = await core.signIn(email, password)
+    if(resp.error){
+      console.log(resp.error)
+      Alert.alert(resp.error.code, resp.error.message)
+      return
     }
+    update( await core.localDB.get.myUser() )
+    navigation.navigate('Home')
   }
 
   return (

@@ -10,13 +10,7 @@ import {
   Alert
 } from 'react-native'
 
-import RNFetchBlob from 'rn-fetch-blob'
 import { launchImageLibrary } from 'react-native-image-picker';
-import auth from '@react-native-firebase/auth'
-import database from '@react-native-firebase/database'
-import { sha256 } from 'react-native-sha256';
-
-import getRealm from '../../services/realm';
 
 import BackScreen from '../../../assests/images/global/navigation'
 import VideoCall from '../../../assests/images/global/videoCall'
@@ -27,91 +21,68 @@ import Camera from '../../../assests/images/pages/Chat/Camera'
 import Message from './Components/Message'
 
 import myDebug from '../../utils/debug/index'
+import Core from '../../services/core'
+
+import { useLocalUser } from '../../Hooks/localDatabase/user'
+
+const core = new Core()
 const debug = (...p) => myDebug('pages/Chat/index.js', p)
 
 const Chat = ({ route, navigation }) => {
 
+  const { user: me } = useLocalUser()
+
   const scrollViewRef = useRef();
-
-  const { friendID, chatName } = route.params;
-
+  const { friendID } = route.params;
   const [friend, setFriend] = useState({
     profilePicture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg'
   });
-
-  const [myUser, setMyUser] = useState({
-    profilePicture: 'https://casa.abril.com.br/wp-content/uploads/2020/06/img-7587.jpg'
-  })
-
   const [messages, setMessages] = useState([])
-
-  const [inputMessage, setInputMessage] = useState({type:'',value:''})
-
+  const [inputMessage, setInputMessage] = useState({ type: '', value: '' })
   const [flagRender, setFlagRender] = useState(false)
 
   useEffect(() => {
-    const run  = async () => {
-      const chatName = [auth().currentUser.uid, friendID].sort().join('-')
-      const realm = await getRealm()
-      setMyUser( realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]  )
-      setFriend( realm.objects('User').filtered(`id == '${friendID}'`)[0]                )
-      const messages = realm.objects('Chat').filtered(`id == '${chatName}'`)[0].messages
-      setMessages( messages )
+    const run = async () => {
+      setFriend(await core.localDB.get.user(friendID))
     }
     run()
   }, [])
 
   useEffect(() => {
-    const run  = async () => {
-      const realm = await getRealm()
-      const chatName = [auth().currentUser.uid, friendID].sort().join('-')
-      const messages = realm.objects('Chat').filtered(`id == '${chatName}'`)[0].messages
-      setMessages( messages )
+    const run = async () => {
+      const chatName = [me.id, friendID].sort().join('-')
+      const { messages } = await core.localDB.get.chat(chatName)
+      setMessages(messages)
     }
     run()
   }, [flagRender])
 
   const onHandleMessageSend = async (message) => {
-
-    if(message.value === '') return
-
-    debug('message to send', message)
-
-    const realm = await getRealm()
-    const sha = await sha256(`${JSON.stringify(message)}${Date.now()}`)
-    const chatName = [auth().currentUser.uid, friendID].sort().join('-')
-    
-    realm.write(  () => {
-      realm.create('ContentMessage', {
-        id: sha,
-        contentType: message.type,
+    console.log(message)
+    await core.sendMessage({
+      content: {
+        type: message.type,
         value: message.value
-      })
-      const date = new Date()
-      const content = realm.objects('ContentMessage').filtered(`id == '${sha}'`)[0]
-      realm.create('Message', {
-        id: sha,
-        from: myUser,
-        to: friend,
-        content: content,
-        timestamp: date
-      })
-      const newMessage = realm.objects('Message').filtered(`id == '${sha}'`)[0]
-      const chat = realm.objects('Chat').filtered(`id == '${chatName}'`)[0]
-      chat.messages = [...chat.messages, newMessage]
-      database().ref(`chats/${chatName}/queues/${friendID}`).once('value')
-      .then(snapshot => {
-        const prev = snapshot.val()? snapshot.val() : []
-        debug('chat name: ',chatName, 'friend id:', friendID)
-        database().ref(`chats/${chatName}/queues/${friendID}`).set([...prev, {
-          content:{
-            type: content.contentType,
-            value: content.value,
-          },
-          timestamp: Date.now(),
-        }])
-      });
+      },
+      from: me,
+      to: await core.localDB.get.user(friendID)
     })
+    setFlagRender(!flagRender)
+  }
+
+  const onCameraPress = async () => {
+
+    launchImageLibrary(
+      {mediaType: 'photo',includeBase64: true},
+      async result => {
+        if (result.didCancel) return
+        await onHandleMessageSend({
+          type: 'image',
+          value: result.assets[0].uri
+        })
+      }
+    );
+
   }
 
   return (
@@ -146,8 +117,8 @@ const Chat = ({ route, navigation }) => {
         </View>
 
       </View>
-      
-      <ScrollView 
+
+      <ScrollView
         style={styles.scrollView}
         ref={scrollViewRef}
         onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: false })}
@@ -155,11 +126,11 @@ const Chat = ({ route, navigation }) => {
 
         <View style={styles.startChat}>
           <Image
-            source={{ uri: myUser.profilePicture }}
+            source={{ uri: me.profilePicture }}
             style={{ width: 100, height: 100, borderRadius: 100 }}
           />
-          <Text style={[styles.startChatPersonName, styles.fontfont]}>{myUser.name}</Text>
-          <Text style={[styles.startChatDescription, styles.font]}>You’re on Chat</Text>
+          <Text style={[styles.startChatPersonName, styles.fontfont]}>{me.name}</Text>
+          <Text style={[styles.startChatDescription, styles.font]}>You're on Chat</Text>
           <View style={styles.newFriend}>
             <View style={styles.imageDuo}>
               <Image
@@ -167,7 +138,7 @@ const Chat = ({ route, navigation }) => {
                 style={[styles.imageDuoImage, { left: 7.5 }]}
               />
               <Image
-                source={{ uri: myUser.profilePicture }}
+                source={{ uri: me.profilePicture }}
                 style={[styles.imageDuoImage, { left: -7.5 }]}
               />
             </View>
@@ -189,7 +160,7 @@ const Chat = ({ route, navigation }) => {
                       timestamp={message.timestamp}
                       content={message.content}
                       profilePicture={message.from.profilePicture}
-                      yourUID={myUser.id}
+                      yourUID={me.id}
                     />
                   </TouchableOpacity>
                   {useSpace ? <View style={{ width: '100%', height: 30 }}></View> : <></>}
@@ -202,30 +173,19 @@ const Chat = ({ route, navigation }) => {
       </ScrollView>
       <View style={styles.inputMessageContainer}>
         <Audio />
-        <Camera
-          onPress={ async () => {
-            launchImageLibrary({
-              mediaType: 'photo',
-              includeBase64: true
-            }, async result => {
-              if(result.didCancel) return
-              await onHandleMessageSend( { type: 'image', value: result.assets[0].base64 } )
-              setFlagRender(!flagRender)
-            } );
-          } }
-        />
+        <Camera onPress={onCameraPress} />
         <TextInput
           style={styles.TextInput}
           placeholder="Aa"
           multiline={true}
-          onChangeText={ (txt) => setInputMessage({ type:'message', value: txt }) }
+          onChangeText={(txt) => setInputMessage({ type: 'message', value: txt })}
           value={inputMessage.value}
         />
         <BackScreen
-          onPress={ async () => {
-            await onHandleMessageSend(inputMessage)
-            setInputMessage({ type:'', value:'' })
-          } }
+          onPress={async () => {
+            onHandleMessageSend(inputMessage)
+            setInputMessage({ type: '', value: '' })
+          }}
         />
       </View>
     </>
@@ -340,7 +300,7 @@ const styles = StyleSheet.create({
 
     height: '100%'
   },
-  inputMessageContainer:{
+  inputMessageContainer: {
     width: '100%',
     height: 'auto',
     maxHeight: '50%',

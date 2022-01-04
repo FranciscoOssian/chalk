@@ -8,17 +8,23 @@ import {
     ScrollView
 } from 'react-native'
 
-import { launchImageLibrary } from 'react-native-image-picker'
-
-import getRealm from '../.././../services/realm'
-
 import BackScreen from '../../../../assests/images/global/navigation'
 
 import { Row, Rows } from '../../../Components/Rows'
 
 import auth from '@react-native-firebase/auth'
 
+import { useLocalUser } from '../../../Hooks/localDatabase/user'
+
+import Core from '../../../services/core'
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const core = new Core()
+
 const Account = ({ navigation }) => {
+
+    const { user } = useLocalUser()
 
     const [name, setName] = useState('')
     const [age, setAge] = useState(18)
@@ -27,9 +33,6 @@ const Account = ({ navigation }) => {
 
     useEffect(() => {
         const run = async () => {
-            const realm = await getRealm()
-            const user = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
-            console.log(user)
             setName(user.name)
             setAge(user.age)
             setBio(user.bio)
@@ -66,8 +69,11 @@ const Account = ({ navigation }) => {
                 />
                 <Row
                     name='LogOut Account'
-                    onPress={ () => {
-                        auth().signOut().then(() => navigation.navigate('SignUp') );
+                    onPress={ async () => {
+                        await auth().signOut()
+                        await AsyncStorage.setItem('firstTimeOpenApp', 'true')
+                        await core.localDB.delete.allDataBase()
+                        navigation.navigate('SignIn')
                     }}
                 />
             </Rows>

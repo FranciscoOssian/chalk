@@ -35,7 +35,7 @@ const message = (lastMessage, yourUID) => {
         const dot3 = lastMessage.content.value.length > 19 ? '...' : ''
         return (`${tagTo}${text}${dot3}${time}`)
     }
-    else{
+    else if(lastMessage.content.contentType === 'image'){
         return(`${tagTo} image📷 ${time}`)
     }
 }

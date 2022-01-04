@@ -14,15 +14,20 @@ import { Picker } from '@react-native-picker/picker';
 
 import firestore from '@react-native-firebase/firestore'
 import storage from '@react-native-firebase/storage';
-import { utils } from '@react-native-firebase/app';
-import auth from '@react-native-firebase/auth'
 
 import getRealm from '../../../../services/realm'
 
+import { useLocalUser } from '../../../../Hooks/localDatabase/user'
+
+import Core from '../../../../services/core'
+
+const core = new Core()
 
 let changeImage = false
 
 const EditProfile = ({ navigation }) => {
+
+    const { user, update: updateUserContext } = useLocalUser()
 
     const [name, setName] = useState('')
     const [age, setAge] = useState(18)
@@ -30,16 +35,14 @@ const EditProfile = ({ navigation }) => {
     const [profileImageUri, setProfileImageUri] = useState('https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG')
 
     useEffect(() => {
-        const run  = async () => {
-            const realm = await getRealm()
-            const user = await realm.objects('User').filtered(`id == '${auth().currentUser.uid}'`)[0]
+        const run = async () => {
             setName(user.name)
             setAge(user.age)
             setBio(user.bio)
             setProfileImageUri(user.profilePicture)
         }
         run()
-    }, [])
+    }, [user])
 
     const onHandleImageChange = () => {
         launchImageLibrary({
@@ -47,42 +50,38 @@ const EditProfile = ({ navigation }) => {
         }, result => {
             if (result.didCancel || result.errorCode) return
             setProfileImageUri(result.assets[0].uri)
+            console.log("ddddddddddd", result.assets[0].uri)
             changeImage = true
         })
     }
 
-    const editUserInFirebase = async (user) => {
-        firestore().collection('Users').doc(user.id)
-            .set(user)
+    const editUserInCloud = async (user) => {
+        core.cloudStore.update.myUser(user)
     }
 
     const onHandleDone = async (userRecived) => {
-        const realm = await getRealm()
-        const user = await realm.objects('User').filtered(`id == '${userRecived.id}'`)[0]
 
         let profilePicture = profileImageUri
 
-        if(changeImage){
-            const reference = storage().ref(`users/${auth().currentUser.uid}/profilePicture.jpg`);
-            await reference.putFile(profilePicture);
-            profilePicture = await reference.getDownloadURL()
+        if (changeImage) {
+            profilePicture = await core.cloudStore.update.myProfilePicture(profilePicture)
         }
 
-        realm.write(() => {
-            user.email = userRecived.email
-            user.name = userRecived.name
-            user.age = userRecived.age
-            user.bio = userRecived.bio
-            user.profilePicture = profilePicture
-        });
-        await editUserInFirebase({
+        await updateUserContext({
             email: userRecived.email,
             name: userRecived.name,
             age: userRecived.age,
             bio: userRecived.bio,
-            profilePicture: profilePicture,
-            id: userRecived.id,
+            profilePicture: profilePicture
         })
+        await editUserInCloud({
+            email: userRecived.email,
+            name: userRecived.name,
+            age: userRecived.age,
+            bio: userRecived.bio,
+            profilePicture: profilePicture
+        })
+
     }
 
     return (
@@ -92,8 +91,7 @@ const EditProfile = ({ navigation }) => {
                     onPress={async () => {
                         navigation.push('Account')
                         onHandleDone({
-                            id: auth().currentUser.uid,
-                            email: auth().currentUser.email,
+                            email: user.email,
                             name: name,
                             bio: bio,
                             age: age
