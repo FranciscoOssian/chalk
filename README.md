@@ -5,3 +5,8 @@
 Powered with a simple match system API developed just for this app, with the purpose of being a bridge to discover and make new friends from a distance.
 
 ## Deploy on google play store soon
+
+## Tasks to do
+<ul>
+  <li>P2P encryption </li>
+</ul>
