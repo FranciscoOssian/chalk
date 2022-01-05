@@ -1,4 +1,5 @@
 {
   "name": "chatalk",
-  "displayName": "chatalk"
+  "displayName": "chatalk",
+  "match_url": "https://chatalk-matching-system.herokuapp.com/"
 }

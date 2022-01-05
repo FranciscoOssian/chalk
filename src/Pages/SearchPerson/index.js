@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Text, ImageBackground, StyleSheet, Image, View, Alert, } from 'react-native'
 
+import appConfig from '../../../app.json'
+
 import { io } from "socket.io-client"
 import firestore from '@react-native-firebase/firestore';
 
@@ -62,7 +64,7 @@ const SearchPeron = ({ navigation }) => {
       return
     }
 
-    const socket = io("https://chatalk-matching-system.herokuapp.com/");
+    const socket = io(appConfig.match_url);
     socket.on('connect', () => {
       console.log('your id is', socket.id)
       
