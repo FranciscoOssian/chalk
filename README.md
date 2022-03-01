@@ -23,8 +23,3 @@ Powered with a simple match system API developed just for this app, with the pur
 ## Deploy on google play store soon
 
 ## Tasks to do
-<ul>
-  <li>P2P encryption </li>
-</ul>
-
-

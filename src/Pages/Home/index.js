@@ -12,9 +12,6 @@ import {
 
 import auth from '@react-native-firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  AdMobBanner,
-} from 'react-native-admob-alpha'
 
 import Chat from './Components/Chat'
 import PushNotification from "react-native-push-notification";
@@ -158,15 +155,6 @@ const Home = ({ navigation }) => {
         }
 
       </ScrollView>
-
-
-      <AdMobBanner
-        adSize="fullBanner"
-        adUnitID="ca-app-pub-3940256099942544/6300978111"
-        testDevices={[AdMobBanner.simulatorId]}
-        adViewDidReceiveAd={(a) => console.log("RECEIVED AD " + a)}
-        onAdFailedToLoad={error => console.error(error)}
-      />
 
       <View style={{ height: 76, width: '100%', alignItems: 'center' }}>
         <SearchSvgComponent
