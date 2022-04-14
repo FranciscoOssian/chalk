@@ -151,10 +151,10 @@ export default class Core {
                 },
                 image: async (url) => {
                     if (url.includes('https://')) {
-                        console.log(RNFetchBlob.fs.dirs.PictureDir + '/Chatalk')
+                        console.log(RNFetchBlob.fs.dirs.PictureDir + '/chalk')
                         const res = await RNFetchBlob.config({
                             fileCache: true,
-                            path : RNFetchBlob.fs.dirs.PictureDir + '/Chatalk/' + await sha256(url) + '.png'
+                            path : RNFetchBlob.fs.dirs.PictureDir + '/chalk/' + await sha256(url) + '.png'
                         }).fetch('GET', url)
                         return 'file://' + res.path()
                     }
@@ -166,7 +166,7 @@ export default class Core {
                             'PNG',
                             100,
                             0,
-                            RNFetchBlob.fs.dirs.PictureDir + '/Chatalk'
+                            RNFetchBlob.fs.dirs.PictureDir + '/chalk'
                         )
                     }
                 }
@@ -255,8 +255,8 @@ export default class Core {
             const rnfb = RNFetchBlob
             const picDir = rnfb.fs.dirs.PictureDir
             const folders = await rnfb.fs.ls(picDir)
-            const found = folders.find(folder => folder === 'Chatalk');
-            if (!found) await rnfb.fs.mkdir(picDir + '/Chatalk')
+            const found = folders.find(folder => folder === 'chalk');
+            if (!found) await rnfb.fs.mkdir(picDir + '/chalk')
             
             value = await this.localDB.create.image(message.content.value)
             this.cloudStore.delete.messageImage(message.content.value)
@@ -281,7 +281,7 @@ export default class Core {
             email: email,
             id: userCredential.user.uid,
             bio: '',
-            profilePicture: 'https://firebasestorage.googleapis.com/v0/b/chatalk-96c5b.appspot.com/o/public%2FdefaultProfilePicture.jpg?alt=media&token=ac1c66c3-903e-482b-8cce-4d945b2159c1'
+            profilePicture: 'https://firebasestorage.googleapis.com/v0/b/chalk-96c5b.appspot.com/o/public%2FdefaultProfilePicture.jpg?alt=media&token=ac1c66c3-903e-482b-8cce-4d945b2159c1'
         }
         this.localDB.create.user(data)
         await this.cloudStore.create.user(data)
@@ -317,8 +317,8 @@ export default class Core {
         const rnfb = RNFetchBlob
         const picDir = rnfb.fs.dirs.PictureDir
         const folders = await rnfb.fs.ls(picDir)
-        const found = folders.find(folder => folder === 'Chatalk');
-        if (!found) await rnfb.fs.mkdir(picDir + '/Chatalk')
+        const found = folders.find(folder => folder === 'chalk');
+        if (!found) await rnfb.fs.mkdir(picDir + '/chalk')
 
         let reference
         let newUri

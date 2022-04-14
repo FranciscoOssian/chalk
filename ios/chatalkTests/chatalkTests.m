@@ -7,11 +7,11 @@
 #define TIMEOUT_SECONDS 600
 #define TEXT_TO_LOOK_FOR @"Welcome to React"
 
-@interface chatalkTests : XCTestCase
+@interface chalkTests : XCTestCase
 
 @end
 
-@implementation chatalkTests
+@implementation chalkTests
 
 - (BOOL)findSubviewInView:(UIView *)view matching:(BOOL(^)(UIView *view))test
 {
