@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "chatalk.app"
-               BlueprintName = "chatalk"
-               ReferencedContainer = "container:chatalk.xcodeproj">
+               BuildableName = "chalk.app"
+               BlueprintName = "chalk"
+               ReferencedContainer = "container:chalk.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "chatalkTests.xctest"
-               BlueprintName = "chatalkTests"
-               ReferencedContainer = "container:chatalk.xcodeproj">
+               BuildableName = "chalkTests.xctest"
+               BlueprintName = "chalkTests"
+               ReferencedContainer = "container:chalk.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "chatalk.app"
-            BlueprintName = "chatalk"
-            ReferencedContainer = "container:chatalk.xcodeproj">
+            BuildableName = "chalk.app"
+            BlueprintName = "chalk"
+            ReferencedContainer = "container:chalk.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "chatalk.app"
-            BlueprintName = "chatalk"
-            ReferencedContainer = "container:chatalk.xcodeproj">
+            BuildableName = "chalk.app"
+            BlueprintName = "chalk"
+            ReferencedContainer = "container:chalk.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

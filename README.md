@@ -1,4 +1,4 @@
-# chatalk
+# chalk
 
 <p align="center">
   <img
