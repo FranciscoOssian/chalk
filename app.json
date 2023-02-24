@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "chalk",
+    "slug": "chalk",
+    "version": "1.0.2",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "googleServicesFile": "./src/services/firebase/GoogleService-Info.plist",
+      "bundleIdentifier": "com.foln.chalk",
+      "buildnumber": 1
+    },
+    "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-google-signin/google-signin",
+      "@react-native-firebase/auth",
+      "expo-notifications"
+    ],
+    "android": {
+      "googleServicesFile": "./src/services/firebase/google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.foln.chalk",
+      "versionCode": 18
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c9477469-1627-4eed-a592-bc082c70c70d"
+      }
+    }
+  }
+}

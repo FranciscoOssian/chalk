@@ -1,0 +1,23 @@
+{
+  "en": {
+    "translation": {}
+  },
+  "pt-BR": {
+    "translation": {
+      "home title": "Chats",
+      "perfil config": "configurações do perfil",
+      "app config": "configurações do aplicativo",
+      "Edit profile": "Editar o perfil",
+      "Verify your account": "Verificar a sua conta",
+      "privacy": "privacidade",
+      "Block this user": "Bloquear esse usuário",
+      "Report this user": "Reportar esse usuário",
+      "Enter your phone number": "Insira o seu número de celular",
+      "current": "atual",
+      "we are search a connection for your": "nós estamos buscando uma conexão para você",
+      "Please wait": "Porfavor espere",
+      "App language": "Linguagem do aplicativo",
+      "Language match": "Linguagem dos novos matches"
+    }
+  }
+}

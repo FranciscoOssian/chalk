@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "125453588649",
+    "firebase_url": "https://chatalk-96c5b-default-rtdb.firebaseio.com",
+    "project_id": "chatalk-96c5b",
+    "storage_bucket": "chatalk-96c5b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:125453588649:android:267895f4e33e782fdb71b8",
+        "android_client_info": {
+          "package_name": "com.foln.chalk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "125453588649-o17l3musu6qnt86pdlqoh6d2nh62a54o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.foln.chalk",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "125453588649-njbndvlekf63ousqqiorgo4fqlrabiav.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTFe6SlTj6M0jlwigS_TJb63L_DZ2kDb8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "125453588649-njbndvlekf63ousqqiorgo4fqlrabiav.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "125453588649-t0u5sq0igjpr37psgag0ri9fb9eiudih.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.chalk"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,8 @@
+{
+  "defaultMatchingConfig": {
+    "from": 18,
+    "to": 18,
+    "lang": "en",
+    "genders": [0,1,2,3,4]
+  }
+}
