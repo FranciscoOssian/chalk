@@ -14,7 +14,6 @@ export const Button = styled(Touch)`
 `;
 
 export const Title = styled.Text`
-  //font-family: 'Assistant';
   font-style: normal;
   font-weight: 400;
   font-size: 17px;

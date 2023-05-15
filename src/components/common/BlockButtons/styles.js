@@ -8,7 +8,6 @@ export const Wrapper = styled.View`
 `;
 
 export const Title = styled.Text`
-  //font-family: 'Assistant';
   font-style: normal;
   font-weight: 700;
   font-size: 13px;

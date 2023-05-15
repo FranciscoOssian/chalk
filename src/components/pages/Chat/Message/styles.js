@@ -18,7 +18,6 @@ export const Message = styled.View`
 `;
 
 export const Txt = styled.Text`
-  //font-family: 'Assistant';
   font-style: normal;
   font-weight: 400;
   font-size: 15px;

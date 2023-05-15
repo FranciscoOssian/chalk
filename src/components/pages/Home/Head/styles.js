@@ -10,7 +10,6 @@ export const Head = styled.View`
 `;
 
 export const Text = styled.Text`
-  //font-family: Assistant;
   font-style: normal;
   font-weight: 700;
   font-size: 30px;

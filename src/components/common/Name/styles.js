@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
 export const Name = styled.Text`
-  //font-family: 'Assistant';
   font-style: normal;
   font-weight: 700;
   font-size: 24px;

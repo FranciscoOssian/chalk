@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
 export const Title = styled.Text`
-  //font-family: 'Assistant';
   font-style: normal;
   font-weight: 700;
   font-size: 24px;
@@ -12,7 +11,6 @@ export const Title = styled.Text`
 `;
 
 export const SubTitle = styled.Text`
-  //font-family: 'Assistant';
   font-style: normal;
   font-weight: 400;
   font-size: 17px;

@@ -17,7 +17,6 @@ export const ProfileImage = styled.Image`
 `;
 
 export const Name = styled.Text`
-  //font-family: Assistant;
   font-style: normal;
   font-weight: 700;
   font-size: 17px;
@@ -29,7 +28,6 @@ export const Name = styled.Text`
 `;
 
 export const Message = styled.Text`
-  //font-family: Assistant;
   font-style: normal;
   font-weight: 400;
   font-size: 14px;

@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
 export const Bio = styled.Text`
-  //font-family: 'Assistant';
   font-style: normal;
   font-weight: 400;
   font-size: 15px;

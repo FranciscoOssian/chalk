@@ -16,7 +16,6 @@ export const HeadWrapper = styled.View`
 export const Container = styled.View``;
 
 export const Name = styled.Text`
-  //font-family: 'Assistant';
   font-style: normal;
   font-weight: 700;
   font-size: 17px;
@@ -27,7 +26,6 @@ export const Name = styled.Text`
 `;
 
 export const Status = styled.Text`
-  //font-family: 'Assistant';
   font-style: normal;
   font-weight: 700;
   font-size: 13px;
