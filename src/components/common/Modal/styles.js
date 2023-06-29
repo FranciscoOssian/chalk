@@ -1,5 +1,5 @@
 import { Dimensions } from 'react-native';
-import styled from 'styled-components';
+import styled from 'styled-components/native';
 
 export const Modal = styled.View`
   width: ${Dimensions.get('window').width}px;

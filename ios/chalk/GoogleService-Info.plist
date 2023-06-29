@@ -7,7 +7,7 @@
 	<key>REVERSED_CLIENT_ID</key>
 	<string>com.googleusercontent.apps.125453588649-t70utaqf7le617v0akte09qesb9p7tql</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>125453588649-k1gq3srikspiu4tlgpbao94vlj42o8ts.apps.googleusercontent.com</string>
+	<string>125453588649-1c1m23oeeqh1ksgch10h90nne6r6kpjj.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDNkrKYfAcnyTwueetJpTqNuQZsMT9u5aU</string>
 	<key>GCM_SENDER_ID</key>
@@ -31,7 +31,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:125453588649:ios:70d7789dc7adf3bedb71b8</string>
+	<string>1:125453588649:ios:1da56ec99d84a8acdb71b8</string>
 	<key>DATABASE_URL</key>
 	<string>https://chatalk-96c5b-default-rtdb.firebaseio.com</string>
 </dict>

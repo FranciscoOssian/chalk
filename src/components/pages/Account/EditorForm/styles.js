@@ -1,5 +1,5 @@
 import { Picker } from '@react-native-picker/picker';
-import styled from 'styled-components';
+import styled from 'styled-components/native';
 
 import BaseInput from '../../../common/BaseInput';
 

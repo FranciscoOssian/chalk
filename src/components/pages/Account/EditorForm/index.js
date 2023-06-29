@@ -50,7 +50,6 @@ const EditorForm = ({ name, age, bio, gender }) => {
           ref={pickRef2}
           selectedValue={gender.value}
           onValueChange={(itemValue, _) => {
-            console.log(itemValue);
             gender.set({ label: genders[itemValue], value: itemValue });
           }}>
           {genders.map((item, index) => (

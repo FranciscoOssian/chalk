@@ -1,5 +1,5 @@
 {
-  "supportedLanguages": ["en", "pt-BR"],
+  "supportedLanguages": ["en", "pt"],
   "languages": [
     { "code": "af", "ENname": "Afrikaans", "NATIVEname": "Afrikaans" },
     { "code": "ak", "ENname": "Akan", "NATIVEname": "Akan" },

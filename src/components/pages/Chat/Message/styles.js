@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from 'styled-components/native';
 
 export const Message = styled.View`
   background-color: ${(p) => (p.my ? p.theme.colors.primary : 'rgba(0, 0, 0, 0.06)')};

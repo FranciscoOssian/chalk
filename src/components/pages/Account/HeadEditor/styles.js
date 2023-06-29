@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from 'styled-components/native';
 
 import { Bio as B } from '../../../common/Bio';
 import Pic from '../../../common/Image';

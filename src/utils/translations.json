@@ -1,9 +1,13 @@
 {
   "en": {
-    "translation": {}
-  },
-  "pt-BR": {
     "translation": {
+      "welcomeMessageTitle": "Welcome to our app!",
+      "welcomeMessageBody": "We're excited to have you here. As you're among the first to try our app, your input is especially important to us. Please be aware that we're still in the testing phase, so you might encounter some instability. If this happens, we apologize and appreciate your patience. If you have any feedback or suggestions, we would love to hear."
+    }
+  },
+  "pt": {
+    "translation": {
+      "Send feedback": "Enviar feedback",
       "home title": "Chats",
       "perfil config": "configurações do perfil",
       "app config": "configurações do aplicativo",
@@ -17,7 +21,11 @@
       "we are search a connection for your": "nós estamos buscando uma conexão para você",
       "Please wait": "Porfavor espere",
       "App language": "Linguagem do aplicativo",
-      "Language match": "Linguagem dos novos matches"
+      "Language match": "Linguagem dos novos matches",
+
+      "welcomeMessageTitle": "Bem-vindo ao nosso aplicativo!",
+      "welcomeMessageBody": "Estamos entusiasmados por ter você aqui. Como você está entre os primeiros a experimentar nosso aplicativo, sua opinião é especialmente importante para nós. Por favor, esteja ciente de que ainda estamos em fase de teste, então você pode encontrar algumas instabilidades. Se isso acontecer, pedimos desculpas e agradecemos sua paciência. Se você tiver algum feedback ou sugestões, adoraríamos ouvir.",
+      "Visit us on TikTok": "Visite-nos no TikTok"
     }
   }
 }

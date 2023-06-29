@@ -5,7 +5,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import styled from 'styled-components';
+import styled from 'styled-components/native';
 
 const Accordion = ({ children, open, height }) => {
   const heightAnimation = useSharedValue(0);

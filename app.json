@@ -19,25 +19,25 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "googleServicesFile": "./src/services/firebase/GoogleService-Info.plist",
+      "googleServicesFile": "./googleServices/GoogleService-Info.plist",
       "bundleIdentifier": "com.foln.chalk",
       "buildnumber": 1
     },
-    "plugins": [
-      "@react-native-firebase/app",
-      "@react-native-google-signin/google-signin",
-      "@react-native-firebase/auth",
-      "expo-notifications"
-    ],
     "android": {
-      "googleServicesFile": "./src/services/firebase/google-services.json",
+      "googleServicesFile": "./googleServices/google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.foln.chalk",
-      "versionCode": 18
+      "versionCode": 24
     },
+    "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "expo-notifications",
+      "@react-native-google-signin/google-signin"
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     },
@@ -46,5 +46,9 @@
         "projectId": "c9477469-1627-4eed-a592-bc082c70c70d"
       }
     }
+  },
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-8514165585360004~7612647851",
+    "ios_app_id": "ca-app-pub-xxxxxxxx~xxxxxxxx"
   }
 }
