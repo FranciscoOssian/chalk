@@ -17,14 +17,14 @@ import { fileCache } from '@src/services/realm/fileCache';
 
 import realmContext from '@contexts/realm';
 import updateFriends from '@src/services/firebase/update/friends';
+import { defaultMatchingConfig } from '@src/utils/defaultStorage';
 
 const matchingConfigStorage = storageExtended('matchingConfig');
-const defaultMatchingConfigStorage = storageExtended('defaultMatchingConfig');
 
 async function matchListener(me: UserType, callback: (friend: UserType & {uid: string}) => void, realm: Realm) {
 
   const socket = io('https://chalk-matching-system.onrender.com');
-  const matchingConfig = await matchingConfigStorage.get() || await defaultMatchingConfigStorage.get();
+  const matchingConfig = await matchingConfigStorage.get() || defaultMatchingConfig;
   
   const meToSend = {
     name: me.name,
