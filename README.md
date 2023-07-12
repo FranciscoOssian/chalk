@@ -20,7 +20,8 @@ The purpose of the application is to allow users to connect with new people thro
 ```bash
 git clone https://github.com/FranciscoOssian/chalk.git
 cd chalk
-yarn install```
+yarn install
+```
 
 ## Follow the instructions to install react native firebase
 
@@ -37,7 +38,8 @@ The following Firebase products must be used for the application to function. No
 ## Execute
 
 ```bash
-yarn android```
+yarn android
+```
 
 # Contribution
 
