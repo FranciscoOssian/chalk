@@ -1,46 +1,44 @@
 # Chalk
 
-Chalk é um aplicativo de chat desenvolvido em React Native e Expo. Ele usa RealmDB e Firebase para armazenar e gerenciar dados do usuário e conversas.
-O objetivo do aplicativo é permitir que os usuários se conectem com novas pessoas através de conversas privadas e em grupo.
+Chalk is a chat application developed in React Native and Expo. It uses RealmDB and Firebase to store and manage user data and conversations.
+The purpose of the application is to allow users to connect with new people through private and group conversations.
 
-# Funcionalidades
-- Cadastro e login de usuários
-- Lista de contatos
-- Conversas privadas
-- Envio de mensagens em tempo real
-- Notificações push
+# Features
+- User registration and login
+- Contact list
+- Private conversations
+- Real-time messaging
+- Push notifications
 
-# Requisitos
-- Conta no firebase
+# Requirements
+- Firebase account
 
-# Instalação
+# Installation
 
-## Clone o repositório e instale as dependências:
+## Clone the repository and install the dependencies:
 
 ```bash
 git clone https://github.com/FranciscoOssian/chalk.git
 cd chalk
-yarn install
-```
+yarn install```
 
-## Siga as instruções para instalar o react native firebase
+## Follow the instructions to install react native firebase
 
 [https://rnfirebase.io/](https://rnfirebase.io/)
 
 ## Firebase
 
-Os seguindos produtos do firebase devem ser usados para o aplicativo funcionar. Observação: no firebase oficial constam regras de segurança do firebase rules que valida usuários mal intencionados, porém como não é o foco do projecto não será abordado aqui
+The following Firebase products must be used for the application to function. Note: in the official firebase there are firebase rules security rules that validate malicious users, however as it is not the focus of the project it will not be addressed here
 
-- auth: email e google
+- auth: email and google
 - firestore
 - realtime
 
 ## Execute
 
 ```bash
-yarn android
-```
+yarn android```
 
-# Contribuição
+# Contribution
 
-Contribuições são bem-vindas! Sinta-se à vontade para abrir uma issue ou um pull request com melhorias ou correções.
+Contributions are welcome! Feel free to open an issue or pull request with improvements or corrections.
