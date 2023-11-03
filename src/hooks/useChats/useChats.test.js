@@ -9,13 +9,16 @@ jest.mock('@contexts/realm', () => ({
 
 describe('useChats', () => {
   it('should return chats from realm context', () => {
-    const chatData = [{ id: '1', name: 'Chat 1' }, { id: '2', name: 'Chat 2' }];
-    
+    const chatData = [
+      { id: '1', name: 'Chat 1' },
+      { id: '2', name: 'Chat 2' },
+    ];
+
     // Mock the useQuery function to return chatData
     realmContext.useQuery.mockReturnValue(chatData);
-    
+
     const { result } = renderHook(() => useChats());
-    
+
     // Assert that the result matches the data from the context
     expect(result.current).toEqual(chatData);
   });

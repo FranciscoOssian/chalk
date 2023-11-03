@@ -28,16 +28,15 @@ describe('useFirstTimeCheck', () => {
     // Mock AsyncStorage.getItem to return a value, indicating a subsequent run
     AsyncStorage.getItem.mockResolvedValue('done');
     AsyncStorage.setItem.mockClear(); // Reset the mock function
-  
+
     const { result, waitForNextUpdate } = renderHook(() => useFirstTimeCheck('someId'));
-  
+
     // Wait for the useEffect to complete
     await waitForNextUpdate();
-  
+
     expect(result.current).toBe(false);
-  
+
     // Ensure that AsyncStorage.setItem is not called on subsequent runs
     expect(AsyncStorage.setItem).not.toHaveBeenCalled();
   });
-  
 });

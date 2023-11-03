@@ -8,10 +8,15 @@
     "web": "expo start --web",
     "build:preview": "eas build -p android --profile preview",
     "expo:clear": "expo start --clear --dev-client",
-    "test": "jest"
+    "test:focus": "jest --verbose",
+    "test": "jest -o"
   },
   "jest": {
     "preset": "jest-expo",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.(js|jsx|ts|tsx)"
+    ],
     "transform": {
       "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
     }
