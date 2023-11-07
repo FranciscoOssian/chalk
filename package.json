@@ -9,7 +9,7 @@
     "build:preview": "eas build -p android --profile preview",
     "expo:clear": "expo start --clear --dev-client",
     "test:focus": "jest --verbose",
-    "test": "jest"
+    "test": "jest --verbose"
   },
   "jest": {
     "preset": "jest-expo",
