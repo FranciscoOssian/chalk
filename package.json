@@ -9,11 +9,11 @@
     "build:preview": "eas build -p android --profile preview",
     "expo:clear": "expo start --clear --dev-client",
     "test:focus": "jest --verbose",
-    "test": "jest -o"
+    "test": "jest"
   },
   "jest": {
     "preset": "jest-expo",
-    "collectCoverage": true,
+    "collectCoverage": false,
     "collectCoverageFrom": [
       "src/**/*.(js|jsx|ts|tsx)"
     ],
