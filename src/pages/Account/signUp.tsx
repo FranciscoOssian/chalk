@@ -50,15 +50,29 @@ const SignUp = ({ navigation }: any) => {
     });
   }, [me]);
 
-  const checkPass = (p1: string, p2: string) => {
-    if (p1 === '' || p2 === '') return false;
-    if (password !== passwordRep) return false;
-    return true;
-  };
-
   const onHandleSignUp = async (method: string) => {
-    if (method === 'email' && !checkPass(password, passwordRep)) {
-      return Alert.alert('Error', 'Passwords do not match');
+    if (method === 'email') {
+      const isEmailEmpty = email === '';
+      const isPasswordEmpty = password === '';
+      const isPasswordRepEmpty = passwordRep === '';
+      const isPasswordCheck = password === passwordRep;
+
+      let errorMessage = '';
+
+      if(isEmailEmpty){
+        errorMessage = errorMessage + `\n- empty email`
+      }
+      if(isPasswordEmpty){
+        errorMessage = errorMessage + `\n- empty password`
+      }
+      if(isPasswordRepEmpty){
+        errorMessage = errorMessage + `\n- empty second password (repeat)`
+      }
+      if(!isPasswordCheck){
+        errorMessage = errorMessage + `\n- password do not check`
+      }
+      
+      return Alert.alert('Error', errorMessage);
     }
 
     let userCredential;

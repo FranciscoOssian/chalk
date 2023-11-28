@@ -57,6 +57,23 @@ function SignIn({ navigation }: any) {
   }, [me]);
 
   const onHandleSignIn = async (method: string) => {
+
+    if (method === 'email') {
+      const isEmailEmpty = email === '';
+      const isPasswordEmpty = password === '';
+
+      let errorMessage = '';
+
+      if(isEmailEmpty){
+        errorMessage = errorMessage + `\n- empty email`
+      }
+      if(isPasswordEmpty){
+        errorMessage = errorMessage + `\n- empty password`
+      }
+      
+      return Alert.alert('Error', errorMessage);
+    }
+
     let userCredential: FirebaseAuthTypes.UserCredential | undefined;
 
     switch (method) {
