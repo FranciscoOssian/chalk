@@ -63,15 +63,18 @@ function SignIn({ navigation }: any) {
       const isPasswordEmpty = password === '';
 
       let errorMessage = '';
+      let isError = false;
 
       if(isEmailEmpty){
-        errorMessage = errorMessage + `\n- empty email`
+        errorMessage = errorMessage + `\n- empty email`;
+        isError = true;
       }
       if(isPasswordEmpty){
         errorMessage = errorMessage + `\n- empty password`
+        isError = true;
       }
       
-      return Alert.alert('Error', errorMessage);
+      if(isError) return Alert.alert('Error', errorMessage);
     }
 
     let userCredential: FirebaseAuthTypes.UserCredential | undefined;
