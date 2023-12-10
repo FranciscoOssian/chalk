@@ -1,5 +1,5 @@
 {
-  "expo":{
+  "expo": {
     "name": "chalk",
     "slug": "chalk",
     "version": "1.0.2",
@@ -28,7 +28,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.foln.chalk",
-      "versionCode": 25
+      "versionCode": 27
     },
     "plugins": [
       "@react-native-firebase/app",

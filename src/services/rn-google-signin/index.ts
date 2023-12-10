@@ -42,7 +42,7 @@ export const signOut = async (): Promise<void> => {
   }
 };
 
-export const getCurrentUserofGooglePrivider = async (): Promise<User | null> => {
+export const getCurrentUserofGoogleProvider = async (): Promise<User | null> => {
   try {
     return await GoogleSignin.getCurrentUser();
   } catch (error) {
