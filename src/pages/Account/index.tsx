@@ -7,6 +7,7 @@ import ButtonRow from '@components/common/ButtonRow';
 import ProfileHead from '@components/common/ProfileHead';
 import SafeArea from '@components/common/SafeArea';
 import { useTranslation } from 'react-i18next';
+import auth from '@react-native-firebase/auth';
 
 import useUser from '@src/hooks/useUser';
 import useMyId from '@src/hooks/useMyId';
@@ -27,13 +28,14 @@ import deleteUser from '@src/services/realm/delete/user';
 import createUserReport from '@src/services/firebase/create/userResport';
 import BaseInput from '@src/components/common/BaseInput';
 
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Row from '@src/components/common/Row';
 import removeFriendOfList from '@src/services/firebase/del/friendOfList';
 import { defaultAppLanguage } from '@utils/defaultStorage.ts';
+import deleteEntireDatabase from '@src/services/realm/delete/deleteEntireDatabase';
+import delUser from '@src/services/firebase/del/user';
 
 function Profile({ navigation, route }: any) {
-
   const user = useUser(route.params.id);
   const myId = useMyId();
 
@@ -58,20 +60,20 @@ function Profile({ navigation, route }: any) {
 
   const onHandleSetMatchConfig = async (config: MatchConfigType) => {
     setMatchConfig(config);
-  }
+  };
 
-  useEffect( () => {
+  useEffect(() => {
     const run = async () => {
       const appL = await storageExtended('appLanguage').get();
-      if(appL) setAppLanguage(appL);
+      if (appL) setAppLanguage(appL);
       else setAppLanguage(defaultAppLanguage);
-    }
+    };
     run();
-  }, [] )
+  }, []);
 
   return (
     <Main showsVerticalScrollIndicator={false}>
-      <ProfileHead 
+      <ProfileHead
         user={user}
         onProfilePress={() => navigation.navigate('/image', { list: [user.profilePicture] })}
         onBackPress={navigation.goBack}
@@ -96,10 +98,8 @@ function Profile({ navigation, route }: any) {
       <BlockButtons title={t('match config')} hidden={hiddenInFriendPage}>
         <ButtonRow mode={{ type: 'accordion', height: 100 }} title="age">
           <AgePicker
-            initial={
-              {from: matchConfig.from, to: matchConfig.to}
-            }
-            callback={({to, from}) => {
+            initial={{ from: matchConfig.from, to: matchConfig.to }}
+            callback={({ to, from }) => {
               const temp = { ...matchConfig };
               temp.from = from;
               temp.to = to;
@@ -110,9 +110,7 @@ function Profile({ navigation, route }: any) {
         <ButtonRow mode={{ type: 'accordion', height: 50 }} title="gender">
           <GenderPicker
             initial={matchConfig.genders}
-            callback={ seleteds =>
-              onHandleSetMatchConfig({...matchConfig, genders:seleteds})
-            }
+            callback={(seleteds) => onHandleSetMatchConfig({ ...matchConfig, genders: seleteds })}
           />
         </ButtonRow>
 
@@ -121,9 +119,7 @@ function Profile({ navigation, route }: any) {
           title={`${t('Match language')} (${t('current')} - ${matchConfig.lang})`}>
           <PickerMatchLanguage
             initial={matchConfig.lang}
-            callback={ seleted =>
-              onHandleSetMatchConfig({...matchConfig, lang:seleted})
-            }
+            callback={(seleted) => onHandleSetMatchConfig({ ...matchConfig, lang: seleted })}
           />
         </ButtonRow>
       </BlockButtons>
@@ -132,50 +128,71 @@ function Profile({ navigation, route }: any) {
         <ButtonRow
           mode={{ type: 'accordion', height: 50 }}
           title={`${t('App language')} (${t('current')} - ${appLanguage})`}>
-          <PickerAppLang
-            initial={appLanguage}
-            callback={lang => onHandleSetAppLanguage(lang)}
-          />
+          <PickerAppLang initial={appLanguage} callback={(lang) => onHandleSetAppLanguage(lang)} />
         </ButtonRow>
       </BlockButtons>
 
       <BlockButtons title={t('privacy')} hidden={hiddenInMyPage}>
-        <ButtonRow title={t('Block this user')} onPress={() => {
-          cascadeAlerts([
-            {
-              title: 'Confirmation',
-              message: 'Are you sure you want to block this user?',
-              onConfirm: () => {
-                if(!user.id || !myId) return;
-                setBlockedUsers(myId, [user.id]);
-              }
-            },
-            {
-              title: 'Confirmation',
-              message: 'Do you want to remove this user from your friends?',
-              onConfirm: () => {
-                if(!user.id || !myId) return;
-                removeFriendOfList(myId, user.id);
-                deleteChat(chatName, realm);
-                deleteUser(user.id, realm);
-              }
-            }
-          ])
-          navigation.navigate('/');
-        }}
-      />
         <ButtonRow
-          title={t('Report user')}
-          mode={{ type: 'accordion', height: 100 }}
-        >
-          <ReportComponent id={user.id}/>
+          title={t('Block this user')}
+          onPress={() => {
+            cascadeAlerts([
+              {
+                title: 'Confirmation',
+                message: 'Are you sure you want to block this user?',
+                onConfirm: () => {
+                  if (!user.id || !myId) return;
+                  setBlockedUsers(myId, [user.id]);
+                },
+              },
+              {
+                title: 'Confirmation',
+                message: 'Do you want to remove this user from your friends?',
+                onConfirm: () => {
+                  if (!user.id || !myId) return;
+                  removeFriendOfList(myId, user.id);
+                  deleteChat(chatName, realm);
+                  deleteUser(user.id, realm);
+                },
+              },
+            ]);
+            navigation.navigate('/');
+          }}
+        />
+        <ButtonRow title={t('Report user')} mode={{ type: 'accordion', height: 100 }}>
+          <ReportComponent id={user.id} />
         </ButtonRow>
         <ButtonRow title={t('Terms and policies')} onPress={() => {}} />
       </BlockButtons>
 
       <BlockButtons title={t('Account')} hidden={hiddenInFriendPage}>
         <ButtonRow title={t('exit')} onPress={() => {}} />
-        <ButtonRow title={t('Delete account')} onPress={() => {}} />
+        <ButtonRow
+          title={t('Delete account')}
+          onPress={() => {
+            Alert.alert(
+              'Delete all user data?',
+              'This will be delete your data permanently',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Confirm',
+                  style: 'destructive',
+                  onPress: () => {
+                    delUser(myId || '');
+                    auth()
+                      .currentUser?.delete()
+                      .then(() => console.log('User deleted'))
+                      .catch((error) => console.log(error));
+                    deleteEntireDatabase(realm);
+                    navigation.navigate('/account/signup');
+                  },
+                },
+              ],
+              { cancelable: true }
+            );
+          }}
+        />
       </BlockButtons>
     </Main>
   );
@@ -191,28 +208,34 @@ export default function (props: any) {
   );
 }
 
-const ReportComponent = ({id}: {id: string | undefined}) => {
+const ReportComponent = ({ id }: { id: string | undefined }) => {
   const [reportMessage, setReportMessage] = useState('');
-  return <Row>
-    <ReportInput
-      multiline
-      value={reportMessage}
-      onChangeText={txt => setReportMessage(txt)}
-      placeholder={`describe your report \n(please use english or portuguese)`}/>
-    <MaterialCommunityIcons name="send-circle-outline" size={50} color="red"
-      onPress={ async () => {
-        createUserReport(id, {
-          reason: reportMessage
-        })
-        .then( () => {
-          Alert.alert("User reported")
-          setReportMessage('')
-        })
-        .catch(e => Alert.alert('Error', e.message))
-      }}
-    />
-  </Row>
-}
+  return (
+    <Row>
+      <ReportInput
+        multiline
+        value={reportMessage}
+        onChangeText={(txt) => setReportMessage(txt)}
+        placeholder={`describe your report \n(please use english or portuguese)`}
+      />
+      <MaterialCommunityIcons
+        name="send-circle-outline"
+        size={50}
+        color="red"
+        onPress={async () => {
+          createUserReport(id, {
+            reason: reportMessage,
+          })
+            .then(() => {
+              Alert.alert('User reported');
+              setReportMessage('');
+            })
+            .catch((e) => Alert.alert('Error', e.message));
+        }}
+      />
+    </Row>
+  );
+};
 
 function cascadeAlerts(alerts: any, index = 0) {
   if (index >= alerts.length) return;
@@ -223,20 +246,19 @@ function cascadeAlerts(alerts: any, index = 0) {
     currentAlert.title,
     currentAlert.message,
     [
-      {text: 'Cancel', style: 'cancel'},
+      { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Confirm', 
+        text: 'Confirm',
         style: 'destructive',
         onPress: () => {
           currentAlert.onConfirm();
           cascadeAlerts(alerts, index + 1);
-        }
-      }
+        },
+      },
     ],
     { cancelable: true }
   );
 }
-
 
 /*
 const Main = styled.ScrollView.attrs({
@@ -255,10 +277,10 @@ const Main = styled.ScrollView.attrs({
 const Main = styled.ScrollView`
   flex: 1;
   width: 95%;
-`
+`;
 
 const ReportInput = styled(BaseInput)`
   min-width: 50%;
   max-width: 85%;
   padding: 10px;
-`
+`;
