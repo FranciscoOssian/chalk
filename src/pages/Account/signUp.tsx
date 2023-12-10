@@ -71,8 +71,8 @@ const SignUp = ({ navigation }: any) => {
       if(!isPasswordCheck){
         errorMessage = errorMessage + `\n- password do not check`
       }
-      
-      return Alert.alert('Error', errorMessage);
+
+      if (errorMessage !== '') return Alert.alert('Error', errorMessage);
     }
 
     let userCredential;
