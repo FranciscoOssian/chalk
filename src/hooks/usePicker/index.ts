@@ -62,8 +62,6 @@ async function controlX(origin: string, destiny: string): Promise<string | null>
       from: origin,
       to: destiny
     });
-
-    console.log('Imagem salva em:', destiny);
     await FileSystem.deleteAsync(origin, { idempotent: true });
     return destiny;
   } catch (e) {

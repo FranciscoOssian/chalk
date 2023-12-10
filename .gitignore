@@ -18,4 +18,5 @@ web-build/
 google-services.json
 GoogleService-Info.plist
 
-/coverage
+# Jest
+coverage/
