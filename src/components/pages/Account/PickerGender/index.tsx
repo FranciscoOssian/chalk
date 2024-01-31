@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
-import { storageExtended } from '@src/utils/storageExtended';
 import useAsync from '@src/hooks/useAsync';
-import { genders } from 'defaultStorage';
+import localStorage from '@src/services/localStorage';
 
-type Genders = string[]
+type Genders = string[];
 
 interface PropsType {
   initial: Genders;
@@ -28,14 +27,14 @@ interface PropsType {
 
 const GenderPicker: React.FC<PropsType> = ({ initial, callback }) => {
   const { t } = useTranslation();
-  
+
   const { data: AllGenders } = useAsync({
     asyncFunction: async () => {
-      const genders = await storageExtended('genders').get()
+      const genders = await localStorage('genders').defaultValue;
       return genders;
     },
-    dependencies: []
-  })
+    dependencies: [],
+  });
 
   const [selectedGenders, setSelectedGenders] = useState<Genders>(initial);
   useEffect(() => {
@@ -43,38 +42,36 @@ const GenderPicker: React.FC<PropsType> = ({ initial, callback }) => {
   }, [initial]);
 
   const handleGenderPick = (itemValue: string) => {
-    if(null) return;
+    if (null) return;
     let newGenders: Genders;
-    if(selectedGenders.includes(itemValue)){
-      if(selectedGenders.length === 1) return;
-      newGenders = selectedGenders.filter(gender => gender !== itemValue)
+    if (selectedGenders.includes(itemValue)) {
+      if (selectedGenders.length === 1) return;
+      newGenders = selectedGenders.filter((gender) => gender !== itemValue);
+      setSelectedGenders(newGenders);
+    } else {
+      newGenders = [...selectedGenders, itemValue];
       setSelectedGenders(newGenders);
     }
-    else{
-      newGenders = [...selectedGenders, itemValue]
-      setSelectedGenders(newGenders);
-    }
-    callback(newGenders)
+    callback(newGenders);
   };
 
   return (
     <Picker
       style={{ width: '100%', height: 50 }}
       selectedValue={``}
-      onValueChange={handleGenderPick}
-    >
+      onValueChange={handleGenderPick}>
       <Picker.Item
         key={0}
         label={selectedGenders.length === 0 ? 'select' : selectedGenders.join('; ')}
         value={null}
       />
-      {AllGenders?.map( (value: string, index: number) =>
+      {AllGenders?.map((value: string, index: number) => (
         <Picker.Item
           key={index}
           label={`${value}` + `${selectedGenders.includes(value) ? ` - ${t('selected')}` : ''}`}
           value={value}
         />
-      )}
+      ))}
     </Picker>
   );
 };

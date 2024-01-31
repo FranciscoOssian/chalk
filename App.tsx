@@ -3,9 +3,13 @@ import realmContext from '@contexts/realm';
 import Routes from '@src/Routes';
 import i18n from '@src/services/i18n';
 import { usePreventScreenCapture } from 'expo-screen-capture';
-import { cleanNotificationsCache, getFireMessagesAndStore, startBackgroundFetchMessages } from '@src/utils/backgroundTaskMessages';
+import {
+  cleanNotificationsCache,
+  getFireMessagesAndStore,
+  startBackgroundFetchMessages,
+} from '@src/utils/backgroundTaskMessages';
 import useAppState from '@src/hooks/useAppState';
-import {useNetInfo} from "@react-native-community/netinfo";
+import { useNetInfo } from '@react-native-community/netinfo';
 
 import mobileAds from 'react-native-google-mobile-ads';
 import remoteConfig from '@react-native-firebase/remote-config';
@@ -15,21 +19,22 @@ remoteConfig()
   .setDefaults({
     HomeChalkBntAd: false,
     nsfwDetectorPassword: 'empty',
-    showTiktokInWelCome: false
+    showTiktokInWelCome: false,
   })
-  .then(() => remoteConfig().fetchAndActivate())
+  .then(() => remoteConfig().fetchAndActivate());
 
-mobileAds()
-  .initialize()
+mobileAds().initialize();
 
 const { RealmProvider } = realmContext;
 i18n();
 
 function App() {
-  return <>
-    <StatusBar/>
-    <Routes/>
-  </>;
+  return (
+    <>
+      <StatusBar />
+      <Routes />
+    </>
+  );
 }
 
 startBackgroundFetchMessages();
@@ -48,7 +53,7 @@ function AppWrapper() {
     );
   }
 
-  if(isForeGround){
+  if (isForeGround) {
     cleanNotificationsCache();
   }
 

@@ -17,7 +17,8 @@ import GenderPicker from '@src/components/pages/Account/PickerGender';
 import MatchConfigType from '@src/types/matchConfig';
 import PickerMatchLanguage from '@src/components/pages/Account/PickerMatchLanguage';
 import PickerAppLang from '@src/components/pages/Account/PickerAppLang';
-import { storageExtended } from '@src/utils/storageExtended';
+
+import localStorage from '@src/services/localStorage';
 
 import realmContext from '@contexts/realm';
 
@@ -31,7 +32,6 @@ import BaseInput from '@src/components/common/BaseInput';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Row from '@src/components/common/Row';
 import removeFriendOfList from '@src/services/firebase/del/friendOfList';
-import { defaultAppLanguage } from '@utils/defaultStorage.ts';
 import deleteEntireDatabase from '@src/services/realm/delete/deleteEntireDatabase';
 import delUser from '@src/services/firebase/del/user';
 
@@ -54,7 +54,7 @@ function Profile({ navigation, route }: any) {
 
   const onHandleSetAppLanguage = async (s: string) => {
     setAppLanguage(s);
-    await storageExtended('appLanguage').set(s);
+    await localStorage('appLanguage').set(s);
     i18n.changeLanguage(s);
   };
 
@@ -64,9 +64,8 @@ function Profile({ navigation, route }: any) {
 
   useEffect(() => {
     const run = async () => {
-      const appL = await storageExtended('appLanguage').get();
-      if (appL) setAppLanguage(appL);
-      else setAppLanguage(defaultAppLanguage);
+      const appL = await localStorage('appLanguage').get();
+      setAppLanguage(appL);
     };
     run();
   }, []);
