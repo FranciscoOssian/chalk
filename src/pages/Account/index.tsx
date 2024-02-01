@@ -84,7 +84,7 @@ function Profile({ navigation, route }: any) {
           onPress={() => {
             return user.authenticated
               ? navigation.navigate('/account/editor')
-              : Alert.alert('You only can edit your profile if is verified');
+              : Alert.alert(t(`You only can edit your profile if is verified`));
           }}
         />
         <ButtonRow
@@ -159,7 +159,7 @@ function Profile({ navigation, route }: any) {
           }}
         />
         <ButtonRow title={t('Report user')} mode={{ type: 'accordion', height: 100 }}>
-          <ReportComponent id={user.id} />
+          <ReportComponent t={translation} id={user.id} />
         </ButtonRow>
         <ButtonRow title={t('Terms and policies')} onPress={() => {}} />
       </BlockButtons>
@@ -207,7 +207,7 @@ export default function (props: any) {
   );
 }
 
-const ReportComponent = ({ id }: { id: string | undefined }) => {
+const ReportComponent = ({ t, id }: { id: string | undefined; t: any }) => {
   const [reportMessage, setReportMessage] = useState('');
   return (
     <Row>
@@ -215,7 +215,7 @@ const ReportComponent = ({ id }: { id: string | undefined }) => {
         multiline
         value={reportMessage}
         onChangeText={(txt) => setReportMessage(txt)}
-        placeholder={`describe your report \n(please use english or portuguese)`}
+        placeholder={t`describe your report` + `\n` + t`(please use english or portuguese)`}
       />
       <MaterialCommunityIcons
         name="send-circle-outline"
@@ -226,7 +226,7 @@ const ReportComponent = ({ id }: { id: string | undefined }) => {
             reason: reportMessage,
           })
             .then(() => {
-              Alert.alert('User reported');
+              Alert.alert(t`User reported`);
               setReportMessage('');
             })
             .catch((e) => Alert.alert('Error', e.message));

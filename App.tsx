@@ -25,7 +25,9 @@ function App() {
 }
 
 startBackgroundFetchMessages();
-getFireMessagesAndStore();
+getFireMessagesAndStore({
+  enableCurrentFriendNotification: false,
+});
 
 function AppWrapper() {
   usePreventScreenCapture();

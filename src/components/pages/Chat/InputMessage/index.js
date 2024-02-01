@@ -17,13 +17,11 @@ export default (props) => {
   const onHandlePickImage = async () => {
     const result = await pickeImage();
     const uri = result.assets[0].uri;
-    console.log(uri.includes('.png'));
     if (
       result.canceled ||
       (!uri.includes('.png') && !uri.includes('.jpeg') && !uri.includes('.mp4'))
     )
       return;
-    console.log(result);
     const temp = {
       contentType: 'image',
       value: result.assets[0].uri,

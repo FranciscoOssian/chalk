@@ -37,8 +37,6 @@ async function matchListener(
     matchingConfig,
   };
 
-  console.log('me to send', meToSend);
-
   socket.on('connect', async () => {
     socket.emit('add_user', meToSend);
     socket.on('match', callback);
@@ -46,7 +44,6 @@ async function matchListener(
 
   return () => {
     socket.disconnect();
-    console.log('closed connection');
   };
 }
 
@@ -71,9 +68,7 @@ const onHandleNewFriend = (realm: Realm, me: UserType, friend: UserType & { uid:
         ],
         messages: [],
       });
-    } catch (e) {
-      console.log('talvez já exista');
-    }
+    } catch (e) {}
   });
   updateFriends(me.id, [friend?.uid]);
 };
@@ -89,7 +84,6 @@ function NewChalk({ navigation }: any) {
       disconnect = await matchListener(
         me,
         (friend) => {
-          console.log('friend  found', friend);
           onHandleNewFriend(realm, me, friend);
           navigation.navigate('/chat', { id: friend?.uid });
         },

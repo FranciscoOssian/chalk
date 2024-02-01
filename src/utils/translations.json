@@ -25,6 +25,12 @@
 
       "from your device": "do seu dispositivo",
 
+      "describe your report": "descreva o seu report",
+      "(please use english or portuguese)": "(por favor use inglês ou português)",
+      "User reported": "Usuário reportado",
+
+      "You only can edit your profile if is verified": "Você só pode editar seu perfil se for verificado",
+
       "welcomeMessageTitle": "Bem-vindo ao nosso aplicativo!",
       "welcomeMessageBody": "Estamos entusiasmados por ter você aqui. Como você está entre os primeiros a experimentar nosso aplicativo, sua opinião é especialmente importante para nós. Por favor, esteja ciente de que ainda estamos em fase de teste, então você pode encontrar algumas instabilidades. Se isso acontecer, pedimos desculpas e agradecemos sua paciência. Se você tiver algum feedback ou sugestões, adoraríamos ouvir.",
       "Visit us on TikTok": "Visite-nos no TikTok"

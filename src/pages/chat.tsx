@@ -27,10 +27,10 @@ function Home({ navigation, route }: any) {
 
   const realm = realmContext.useRealm();
 
-  const sendMessage = async (message: {type: string, value: string}) => {
-    if(!me.id || !friend.id) return;
+  const sendMessage = async (message: { type: string; value: string }) => {
+    if (!me.id || !friend.id) return;
 
-    const timestamp = new Date(Math.floor(Date.now() / 1000) * 1000)
+    const timestamp = new Date(Math.floor(Date.now() / 1000) * 1000);
 
     createRealmMessage(realm, {
       from: me.id || '',
@@ -38,29 +38,29 @@ function Home({ navigation, route }: any) {
       timestamp,
       content: {
         contentType: message.type,
-        value: message.value
-      }
-    })
+        value: message.value,
+      },
+    });
     createFirebaseMessage({
-      content:{
+      content: {
         contentType: message.type,
         value: message.value,
       },
       from: me.id,
       to: friend.id,
       timestamp,
-    })
+    });
   };
 
-  useEffect(()=>{
-    const run = async() => {
-      await AsyncStorage.setItem(`sendNotification:${chat?.id}`, 'no')
-    }
-    run()
+  useEffect(() => {
+    const run = async () => {
+      await AsyncStorage.setItem(`sendNotification:${chat?.id}`, 'no');
+    };
+    run();
     return () => {
-      AsyncStorage.setItem(`sendNotification:${chat?.id}`, 'yes')
-    }
-  }, [chat])
+      AsyncStorage.setItem(`sendNotification:${chat?.id}`, 'yes');
+    };
+  }, [chat]);
 
   return (
     <Main>
@@ -93,7 +93,7 @@ function Home({ navigation, route }: any) {
         value={inputMessage}
         onChangeText={setInputMessage}
         onSend={({ contentType, value }: any) => {
-          sendMessage({type: contentType, value})
+          sendMessage({ type: contentType, value });
         }}
       />
     </Main>
