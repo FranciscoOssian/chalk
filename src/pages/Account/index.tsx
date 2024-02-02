@@ -165,7 +165,45 @@ function Profile({ navigation, route }: any) {
       </BlockButtons>
 
       <BlockButtons title={t('Account')} hidden={hiddenInFriendPage}>
-        <ButtonRow title={t('exit')} onPress={() => {}} />
+        <ButtonRow
+          title={t('exit')}
+          onPress={() => {
+            Alert.alert(
+              t('confirmation'),
+              t('confirm'),
+              [
+                {
+                  text: t('cancel'),
+                  onPress: () => console.log('Cancelado'),
+                  style: 'cancel',
+                },
+                {
+                  text: t('confirm'),
+                  onPress: async () => {
+                    try {
+                      realm.write(() => {
+                        realm.deleteAll();
+                      });
+                      console.log('Realm deletado com sucesso!');
+
+                      await localStorage('').AsyncStorage.clear();
+                      console.log('Armazenamento local limpo com sucesso!');
+
+                      await auth().signOut(); // Faz logout do usuário
+                      console.log('Usuário desconectado com sucesso!');
+
+                      navigation.navigate('/signin');
+                    } catch (error) {
+                      console.error('Erro ao deletar Realm:', error);
+                    }
+                  },
+                },
+              ],
+              { cancelable: true }
+            );
+          }}
+        />
+
         <ButtonRow
           title={t('Delete account')}
           onPress={() => {

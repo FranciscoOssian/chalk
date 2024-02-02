@@ -18,6 +18,7 @@ export const storageExtended = (tag: string) => {
   return {
     set,
     get,
+    AsyncStorage,
     defaultValue,
   };
 };
