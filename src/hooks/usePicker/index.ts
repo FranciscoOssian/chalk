@@ -3,11 +3,12 @@ import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePickerSuccessResult } from 'expo-image-picker';
 
-interface PickerProps{
-  propagate: boolean 
+interface PickerProps {
+  propagate: boolean;
+  save?: boolean;
 }
 
-type ImageType = ImagePickerSuccessResult
+type ImageType = ImagePickerSuccessResult;
 
 type PickFunction = (props: PickerProps) => Promise<ImageType | undefined>;
 
@@ -20,8 +21,10 @@ type PickFunction = (props: PickerProps) => Promise<ImageType | undefined>;
  * @param {number} config.quality - The quality of the selected image.
  * @returns {Array} An array containing the selected image URI and the pick function.
  */
-export default function usePicker(config: ImagePicker.ImagePickerOptions | undefined = undefined): [ImageType | undefined, PickFunction] {
-  const [result, setImage] = useState<ImagePickerSuccessResult>();
+export default function usePicker(
+  config: ImagePicker.ImagePickerOptions | undefined = undefined
+): [ImageType | undefined, PickFunction] {
+  const [result, setResult] = useState<ImagePickerSuccessResult>();
 
   const defaultConfig = {
     mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -31,21 +34,17 @@ export default function usePicker(config: ImagePicker.ImagePickerOptions | undef
     base64: true,
   };
 
-  const pick = async ({propagate = true}: PickerProps) => {
-    if(!FileSystem.documentDirectory) return;
-    const result = await ImagePicker.launchImageLibraryAsync(config || defaultConfig);
-    if(result.canceled) return;
-    for(let i = 0; i < result.assets.length; ++i){
-      result.assets[i].uri =
-        await controlX(
-          result.assets[i].uri,
-          FileSystem.documentDirectory + result.assets[i].fileName
-        ) || ''
+  const pick = async ({ propagate = true, save = false }: PickerProps) => {
+    if (!FileSystem.documentDirectory) return;
+    const result = await ImagePicker.launchImageLibraryAsync({ ...defaultConfig, ...config });
+    if (result.canceled) return;
+    if (propagate) {
+      setResult(result);
     }
-    if(propagate){
-      setImage(result);
+    if (save) {
+      ///
     }
-    return (result)
+    return result;
   };
 
   return [result, pick];
@@ -60,7 +59,7 @@ async function controlX(origin: string, destiny: string): Promise<string | null>
   try {
     await FileSystem.moveAsync({
       from: origin,
-      to: destiny
+      to: destiny,
     });
     await FileSystem.deleteAsync(origin, { idempotent: true });
     return destiny;

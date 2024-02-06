@@ -15,13 +15,18 @@ const Pic = (props: any) => (
 );
 
 interface HeadEditorPropsType {
-  onBackPress: () => void
-  onDonePress: () => void
-  onProfilePhotoPick?: () => void
-  profile?: UserType
+  onBackPress: () => void;
+  onDonePress: () => void;
+  onProfilePhotoPick?: () => void;
+  profile?: UserType;
 }
 
-const HeadEditor = ({ onBackPress, onDonePress, onProfilePhotoPick, profile }: HeadEditorPropsType) => {
+const HeadEditor = ({
+  onBackPress,
+  onDonePress,
+  onProfilePhotoPick,
+  profile,
+}: HeadEditorPropsType) => {
   return (
     <View>
       <Wrapper>

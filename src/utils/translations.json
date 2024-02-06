@@ -25,6 +25,13 @@
 
       "from your device": "do seu dispositivo",
 
+      "Error updating profile": "Erro ao atualizar o perfil",
+      "Profile updated successfully": "Perfil atualizado com sucesso",
+
+      "Alert": "Alerta",
+
+      "your image was detected as inappropriate for the application": "sua imagem foi detectada como inapropriada para esse aplicativo",
+
       "describe your report": "descreva o seu report",
       "(please use english or portuguese)": "(por favor use inglês ou português)",
       "User reported": "Usuário reportado",

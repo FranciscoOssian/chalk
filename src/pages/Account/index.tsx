@@ -231,6 +231,16 @@ function Profile({ navigation, route }: any) {
           }}
         />
       </BlockButtons>
+
+      <BlockButtons title={t('Admin')} hidden={hiddenInFriendPage}>
+        <ButtonRow
+          title={t('soft ban')}
+          onPress={async () => {
+            //if (!user?.id) return;
+            //// await delUser(user.id);
+          }}
+        />
+      </BlockButtons>
     </Main>
   );
 }
