@@ -21,11 +21,10 @@ const { Navigator } = Stack;
 const { Screen } = Stack;
 
 function Routes() {
-
-  const [myId, setMyId] = useState(null)
-  useEffect(()=>{
-    AsyncStorage.getItem('my-uid').then( v => setMyId(v) )
-  }, [])
+  const [myId, setMyId] = useState(null);
+  useEffect(() => {
+    AsyncStorage.getItem('my-uid').then((v) => setMyId(v));
+  }, []);
 
   return (
     <SafeAreaProvider>
@@ -33,26 +32,29 @@ function Routes() {
         <Navigator
           headerMode="none"
           screenOptions={{ cardStyle: { backgroundColor: 'transparent' }, headerShown: false }}>
-            {
-              myId?
-              <>
-                <Screen name="/" component={Home} />
-                <Screen name="/account/signup" component={SignUp} />
-              </>
-              :
-              <>
-                <Screen name="/account/signup" component={SignUp} />
-                <Screen name="/" component={Home} />
-              </>
-            }
-          
+          {myId ? (
+            <>
+              <Screen name="/" component={Home} />
+              <Screen name="/account/signup" component={SignUp} />
+            </>
+          ) : (
+            <>
+              <Screen name="/account/signup" component={SignUp} />
+              <Screen name="/" component={Home} />
+            </>
+          )}
+
           <Screen name="/account/signin" component={SignIn} />
           <Screen name="/account/verify" component={Verify} />
           <Screen name="/chat" component={Chat} />
           <Screen name="/newChalk" component={NewChalk} />
           <Screen name="/account" component={MyProfile} />
           <Screen name="/account/editor" component={ProfileEditor} />
-          <Screen name="/image" component={Image} />
+          <Screen
+            name="/image"
+            options={{ headerShown: true, headerBackTitle: 'Voltar', title: '' }}
+            component={Image}
+          />
         </Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
