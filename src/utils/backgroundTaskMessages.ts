@@ -1,19 +1,17 @@
+import { AppState } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import database from '@react-native-firebase/database';
-import * as BackgroundFetch from 'expo-background-fetch';
-import * as TaskManager from 'expo-task-manager';
 
 import { sendNotification } from '@services/notifications';
 import getRealm from '@services/realm/getRealm';
 import ChatType from '@src/types/chat';
 
-import saveMessagesByList from './saveMessagesByList';
 import getChatMediaLink from '@src/services/firebase/get/chatMediaLink';
 import { fileCache } from '@src/services/realm/fileCache';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import listenToChatQueue from '@services/firebase/listeners/chatQueue';
 
-export const BACKGROUND_FETCH_TASK = 'fetch-new-messages-and-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import messages from '@src/services/realm/create/messages';
 
 let lastNotifications: any = {};
 
@@ -21,27 +19,19 @@ export const cleanNotificationsCache = () => {
   lastNotifications = {};
 };
 
-type configType = { enableCurrentFriendNotification: boolean } | undefined;
-
-const getOnFireBase = async (chat: ChatType, myId: string, realm: Realm, config: configType) => {
-  const queueRef = database().ref(`chats/${chat.id}/queues/${myId}`);
-  queueRef.on('value', async (snapshot) => {
-    let lastMessages: any[] = snapshot.val() ? snapshot.val() : [];
+const getOnFireBase = async (chat: ChatType, myId: string, realm: Realm) => {
+  listenToChatQueue(chat.id, myId, async (dataSnapshot, queueRef) => {
+    let lastMessages: any[] = dataSnapshot.val() ? dataSnapshot.val() : [];
     const friend = chat.owners.filter((o) => o.id != myId)[0];
 
     lastMessages = await Promise.all(
       lastMessages.map(async (msg: any) => {
         let value = msg.content.value;
         if (msg.content.type === 'image') {
-          if (!msg.content.value.includes('https')) {
-            const external = await getChatMediaLink(chat.id, msg.content.value);
-            const cached = await fileCache(external.url, realm);
-            value = cached.path;
-            external.delete();
-          } else {
-            const cached = await fileCache(msg.content.value, realm);
-            value = cached.path;
-          }
+          const external = await getChatMediaLink(chat.id, msg.content.value);
+          const cached = await fileCache(external.url, realm);
+          value = cached.path;
+          external.delete();
         }
         return {
           ...msg,
@@ -53,13 +43,16 @@ const getOnFireBase = async (chat: ChatType, myId: string, realm: Realm, config:
       })
     );
 
-    saveMessagesByList(chat, lastMessages as []);
+    messages(realm, myId, chat, lastMessages);
 
     queueRef.set([]);
 
-    const send = await AsyncStorage.getItem(`sendNotification:${chat.id}`);
-    if (send === 'no' || send === null) {
-      return;
+    const chatId = await AsyncStorage.getItem(`currentOpenedChat`);
+
+    if (AppState.currentState === 'active') {
+      if (chatId === chat?.id) {
+        return;
+      }
     }
 
     lastMessages.map((msg: any) => {
@@ -86,49 +79,21 @@ const getOnFireBase = async (chat: ChatType, myId: string, realm: Realm, config:
   });
 };
 
-export const getFireMessagesAndStore = async (config: configType) => {
+export const iterateOverChats = async () => {
   const realm = await getRealm();
   const myId = auth().currentUser?.uid;
   if (!myId) {
     auth().onAuthStateChanged((usr) => {
-      if (usr) getFireMessagesAndStore(config);
+      if (usr) iterateOverChats();
     });
     return;
   }
   realm.objects<ChatType>('Chat').map(async (chat) => {
-    getOnFireBase(chat, myId, realm, config);
+    getOnFireBase(chat, myId, realm);
   });
   realm.objects<ChatType>('Chat').addListener((chats, changes) => {
     changes.insertions.forEach((index) => {
-      getOnFireBase(chats[index], myId, realm, config);
+      getOnFireBase(chats[index], myId, realm);
     });
   });
 };
-
-TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
-  const now = Date.now();
-
-  console.log(`Got background fetch call at date: ${new Date(now).toISOString()}`);
-
-  await getFireMessagesAndStore({
-    enableCurrentFriendNotification: true,
-  });
-
-  // Be sure to return the successful result type!
-  return BackgroundFetch.BackgroundFetchResult.NewData;
-});
-
-async function registerBackgroundFetchAsync() {
-  return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-    minimumInterval: 60,
-    stopOnTerminate: false, // android only,
-    startOnBoot: true, // android only
-  });
-}
-
-async function unregisterBackgroundFetchAsync() {
-  return BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
-}
-
-export const startBackgroundFetchMessages = registerBackgroundFetchAsync;
-export const removeBackgroundFetchMessages = unregisterBackgroundFetchAsync;

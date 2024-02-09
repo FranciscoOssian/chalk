@@ -54,11 +54,12 @@ function Home({ navigation, route }: any) {
 
   useEffect(() => {
     const run = async () => {
-      await AsyncStorage.setItem(`sendNotification:${chat?.id}`, 'no');
+      if (!chat?.id) return;
+      await AsyncStorage.setItem('currentOpenedChat', chat?.id);
     };
     run();
     return () => {
-      AsyncStorage.setItem(`sendNotification:${chat?.id}`, 'yes');
+      AsyncStorage.setItem('currentOpenedChat', '');
     };
   }, [chat]);
 
@@ -113,6 +114,6 @@ export default function (props: any) {
 const Main = styled.View`
   flex: 1;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   width: 100%;
 `;

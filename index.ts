@@ -7,6 +7,8 @@ import auth from '@react-native-firebase/auth';
 import isAdm from '@src/services/firebase/get/isAdmin';
 import localStorage from '@src/services/localStorage';
 
+import '@react-native-firebase/analytics';
+
 remoteConfig()
   .setDefaults({
     HomeChalkBntAd: false,

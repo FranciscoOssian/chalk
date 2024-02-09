@@ -7,11 +7,8 @@ import Entypo from '@expo/vector-icons/Entypo';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import { usePreventScreenCapture } from 'expo-screen-capture';
-import {
-  cleanNotificationsCache,
-  getFireMessagesAndStore,
-  startBackgroundFetchMessages,
-} from '@src/utils/backgroundTaskMessages';
+import { cleanNotificationsCache, iterateOverChats } from '@src/utils/backgroundTaskMessages';
+import { startBackgroundFetch } from '@services/background';
 import useAppState from '@src/hooks/useAppState';
 import { useNetInfo } from '@react-native-community/netinfo';
 import LottieView from 'lottie-react-native';
@@ -45,10 +42,12 @@ function SplashScreenComp() {
   );
 }
 
-startBackgroundFetchMessages();
-getFireMessagesAndStore({
-  enableCurrentFriendNotification: false,
+const BACKGROUND_FETCH_TASK = 'fetch-new-messages-store-and-notify';
+startBackgroundFetch(BACKGROUND_FETCH_TASK, async () => {
+  iterateOverChats();
 });
+
+iterateOverChats();
 
 function AppWrapper() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -80,7 +79,7 @@ function AppWrapper() {
 
   usePreventScreenCapture();
   const netInfo = useNetInfo();
-  const isForeGround = useAppState();
+  const isActive = useAppState();
 
   if (netInfo.isConnected === false) {
     return (
@@ -90,7 +89,7 @@ function AppWrapper() {
     );
   }
 
-  if (isForeGround) {
+  if (isActive) {
     cleanNotificationsCache();
   }
 
