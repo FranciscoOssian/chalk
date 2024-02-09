@@ -1,14 +1,14 @@
 import * as FileSystem from 'expo-file-system';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import { ImagePickerSuccessResult } from 'expo-image-picker';
+import { ImagePickerResult } from 'expo-image-picker';
 
 interface PickerProps {
   propagate: boolean;
   save?: boolean;
 }
 
-type ImageType = ImagePickerSuccessResult;
+type ImageType = ImagePickerResult;
 
 type PickFunction = (props: PickerProps) => Promise<ImageType | undefined>;
 
@@ -24,7 +24,7 @@ type PickFunction = (props: PickerProps) => Promise<ImageType | undefined>;
 export default function usePicker(
   config: ImagePicker.ImagePickerOptions | undefined = undefined
 ): [ImageType | undefined, PickFunction] {
-  const [result, setResult] = useState<ImagePickerSuccessResult>();
+  const [result, setResult] = useState<ImageType>();
 
   const defaultConfig = {
     mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -37,7 +37,6 @@ export default function usePicker(
   const pick = async ({ propagate = true, save = false }: PickerProps) => {
     if (!FileSystem.documentDirectory) return;
     const result = await ImagePicker.launchImageLibraryAsync({ ...defaultConfig, ...config });
-    if (result.canceled) return;
     if (propagate) {
       setResult(result);
     }
@@ -48,23 +47,4 @@ export default function usePicker(
   };
 
   return [result, pick];
-}
-
-async function controlX(origin: string, destiny: string): Promise<string | null> {
-  if (FileSystem.documentDirectory === null) {
-    console.error('Document directory is not available');
-    return null;
-  }
-
-  try {
-    await FileSystem.moveAsync({
-      from: origin,
-      to: destiny,
-    });
-    await FileSystem.deleteAsync(origin, { idempotent: true });
-    return destiny;
-  } catch (e) {
-    console.error('Erro ao salvar a imagem:', e);
-    throw e;
-  }
 }

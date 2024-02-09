@@ -1,6 +1,10 @@
 import styled from 'styled-components/native';
 
-export const Message = styled.View`
+type My = boolean;
+type Type = 'image' | 'text';
+type Theme = any;
+
+export const Message = styled.View<{ my: My; type: Type; theme: Theme }>`
   background-color: ${(p) => (p.my ? p.theme.colors.primary : 'rgba(0, 0, 0, 0.06)')};
   border-radius: 18px;
 
@@ -17,7 +21,7 @@ export const Message = styled.View`
   align-items: flex-start;
 `;
 
-export const Txt = styled.Text`
+export const Txt = styled.Text<{ my: My }>`
   font-style: normal;
   font-weight: 400;
   font-size: 15px;
@@ -36,7 +40,7 @@ export const Img = styled.View`
   border-radius: 12px;
 `;
 
-export const Conteiner = styled.View`
+export const Conteiner = styled.View<{ my: My }>`
   width: 100%;
 
   align-items: ${(p) => (p.my ? 'flex-end' : 'flex-start')};

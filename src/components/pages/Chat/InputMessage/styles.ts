@@ -19,7 +19,7 @@ export const Wrapper = styled.View`
   background: rgba(0, 0, 0, 0.05);
   border-radius: 18px;
 
-  width: 80%;
+  width: 70%;
 
   flex-direction: row;
 
@@ -34,5 +34,19 @@ export const Wrapper = styled.View`
 
 export const Row = styled(R)`
   align-items: center;
-  margin: 0 0 43px 0;
+  margin: 0 0 10px 0;
+`;
+
+export const Container = styled(R)`
+  width: 90px;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const ContainerLeft = styled(R)`
+  margin: 0 10px 0 5px;
+`;
+
+export const ContainerRight = styled(R)`
+  margin: 0 5px 0 10px;
 `;
