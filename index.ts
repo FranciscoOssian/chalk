@@ -6,6 +6,7 @@ import i18n from '@src/services/i18n';
 import auth from '@react-native-firebase/auth';
 import isAdm from '@src/services/firebase/get/isAdmin';
 import localStorage from '@src/services/localStorage';
+import { registerForPushNotificationsAsync } from '@src/services/notifications';
 
 import '@react-native-firebase/analytics';
 
@@ -19,6 +20,8 @@ remoteConfig()
 
 mobileAds().initialize();
 i18n();
+
+registerForPushNotificationsAsync();
 
 auth().onAuthStateChanged(async (user) => {
   if (user) {

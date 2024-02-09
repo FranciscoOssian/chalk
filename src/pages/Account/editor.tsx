@@ -11,7 +11,7 @@ import UserType from '@src/types/user';
 
 import { defaultFirebaseProfilePicture } from '@utils/consts.ts';
 import usePicker from '@src/hooks/usePicker';
-import { Alert } from 'react-native';
+import Snackbar from 'react-native-snackbar';
 import useUser from '@hooks/useUser';
 
 import setFireUser from '@services/firebase/set/user';
@@ -40,7 +40,10 @@ const classifyImage = async (
     return JSON.parse(response.body);
   } catch (error) {
     console.error('Error classifying image:', error);
-    Alert.alert('Error', 'Failed to classify image');
+    Snackbar.show({
+      text: 'Error, Failed to classify image',
+      duration: Snackbar.LENGTH_SHORT,
+    });
     return [];
   }
 };
@@ -144,10 +147,16 @@ function MyProfile({ navigation }: any) {
         usr.bio = newMe.bio;
       });
     } catch (error) {
-      alert(t('Error updating profile'));
+      Snackbar.show({
+        text: t('Error updating profile'),
+        duration: Snackbar.LENGTH_SHORT,
+      });
     } finally {
       navigation.push('/');
-      alert(t('Profile updated successfully'));
+      Snackbar.show({
+        text: t('Profile updated successfully'),
+        duration: Snackbar.LENGTH_SHORT,
+      });
     }
   };
 
@@ -158,10 +167,12 @@ function MyProfile({ navigation }: any) {
     if (result?.canceled || !result) return;
     const nsfw = await isNSFW(result.assets[0].uri);
     if (nsfw) {
-      Alert.alert(
-        t('Alert'),
-        t(`your image was detected as inappropriate for the application`) + `🧐🤚📸`
-      );
+      Snackbar.show({
+        text: `${t('Alert')} - ${t(
+          `your image was detected as inappropriate for the application`
+        )} 🧐🤚📸`,
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return;
     } else {
       onSetterUser('profilePicture', result.assets[0].uri);

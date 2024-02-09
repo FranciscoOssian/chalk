@@ -7,6 +7,7 @@ import ButtonRow from '@components/common/ButtonRow';
 import ProfileHead from '@components/common/ProfileHead';
 import SafeArea from '@components/common/SafeArea';
 import { useTranslation } from 'react-i18next';
+import Snackbar from 'react-native-snackbar';
 import auth from '@react-native-firebase/auth';
 
 import useUser from '@src/hooks/useUser';
@@ -277,7 +278,12 @@ const ReportComponent = ({ t, id }: { id: string | undefined; t: any }) => {
               Alert.alert(t`User reported`);
               setReportMessage('');
             })
-            .catch((e) => Alert.alert('Error', e.message));
+            .catch((e) =>
+              Snackbar.show({
+                text: `Error, ${e.message}`,
+                duration: Snackbar.LENGTH_SHORT,
+              })
+            );
         }}
       />
     </Row>

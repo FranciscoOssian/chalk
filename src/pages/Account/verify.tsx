@@ -4,6 +4,7 @@ import { TouchableOpacity, Text, Alert } from 'react-native';
 import styled from 'styled-components/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import Snackbar from 'react-native-snackbar';
 
 import ThemeProvider from '@providers/theme';
 import Back from '@components/common/Back';
@@ -20,7 +21,7 @@ import UserType from '@src/types/user';
 
 function MyProfile({ navigation }: any) {
   const { t: translation } = useTranslation();
-  const t = (s: string) => translation<string>(s)
+  const t = (s: string) => translation<string>(s);
 
   const [sended, setSended] = useState<boolean>();
   const [confirm, setConfirm] = useState<any | null>();
@@ -33,20 +34,26 @@ function MyProfile({ navigation }: any) {
   const user = useUser();
 
   const onPress = async (): Promise<void> => {
-    Alert.alert('wait...');
+    Snackbar.show({
+      text: 'wait...',
+      duration: Snackbar.LENGTH_SHORT,
+    });
     if (!sended) {
       const confi = await auth().verifyPhoneNumber(countryCode + phoneNumber);
       setConfirm(confi);
       setSended(true);
     } else {
-      try{
+      try {
         const credential = auth.PhoneAuthProvider.credential(confirm.verificationId, code);
         await auth().currentUser?.linkWithCredential(credential);
-      }catch(e: any){
-        if(e?.code === 'auth/invalid-verification-code')
-          return Alert.alert( t('Auth'), `${t('invalid verification code')} - ${code}` )
+      } catch (e: any) {
+        if (e?.code === 'auth/invalid-verification-code')
+          return Alert.alert(t('Auth'), `${t('invalid verification code')} - ${code}`);
       }
-      Alert.alert('confirmed phone!');
+      Snackbar.show({
+        text: 'confirmed phone!',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       auth().onAuthStateChanged(async (u) => {
         if (!u?.phoneNumber) return;
         // Update user verification status in Firebase
@@ -56,12 +63,12 @@ function MyProfile({ navigation }: any) {
         // Update user verification status in Realm
         realm.write(() => {
           const user = realm.objects<UserType>('User').filtered(`id = "${u.uid}"`)[0];
-          if(!user) return;
+          if (!user) return;
           user.authenticated = true;
         });
       });
     }
-  }
+  };
 
   return (
     <Main>
@@ -85,7 +92,7 @@ function MyProfile({ navigation }: any) {
               textContentType="telephoneNumber"
               value={phoneNumber}
               onChangeText={(v) => setPhoneNumber(v)}
-              placeholder='xxxxxxxxxxx'
+              placeholder="xxxxxxxxxxx"
             />
           </Row>
         ) : (
@@ -97,9 +104,7 @@ function MyProfile({ navigation }: any) {
           />
         )}
 
-        <TouchableOpacity
-          onPress={onPress}
-        >
+        <TouchableOpacity onPress={onPress}>
           <Text
             style={{
               width: 50,
