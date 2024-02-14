@@ -2,9 +2,20 @@ import * as Notifications from 'expo-notifications';
 
 import { registerForPushNotificationsAsync, sendNotification } from './index.js'; // Substitua pelo caminho real para o seu arquivo pushNotifications
 
+// Mock de Expo Constants
+jest.mock('expo-constants', () => ({
+  expoConfig: {
+    extra: {
+      eas: {
+        projectId: '',
+      },
+    },
+  },
+}));
+
 // Mock de Expo Device
 jest.mock('expo-device', () => ({
-  isDevice: true, // Substitua pelo valor desejado (true para simular que é um dispositivo)
+  isDevice: true,
 }));
 
 // Mock de Expo Notifications
@@ -25,7 +36,7 @@ describe('registerForPushNotificationsAsync', () => {
   it('should register for push notifications', async () => {
     const token = await registerForPushNotificationsAsync();
 
-    expect(token).toEqual('mocked-token');
+    expect(token).toEqual({ data: 'mocked-token' });
   });
 });
 
@@ -40,7 +51,6 @@ describe('sendNotification', () => {
 
     await sendNotification(data);
 
-    // Verifique se a função de agendar notificação foi chamada com os dados corretos
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith({
       identifier: data.identifier,
       content: {

@@ -1,10 +1,9 @@
 import { useState } from 'react';
 
 import Camera from '../Camera';
-//import Clip from '@components/common/Clip';
+import { CameraButton } from '@components/common/ExpoCameraUI';
 import Send from '../SendIcon';
-import usePicker from '@src/hooks/usePicker';
-import { Input, Wrapper, Row, Container /*ContainerLeft, ContainerRight*/ } from './styles';
+import { Input, Wrapper, Row, Container } from './styles';
 
 interface Props {
   onSend: (v: any) => Promise<void>;
@@ -12,11 +11,8 @@ interface Props {
 
 export default (props: Props) => {
   const [textMessage, setTxtMessage] = useState('');
-  const [_, pick] = usePicker();
-  const onHandlePickImage = async () => {
-    const result = await pick({ propagate: false });
-    if (result?.canceled) return;
-    const uri = result?.assets[0]?.uri;
+  const onHandlePickImage = async (result: { uri: string }) => {
+    const uri = result.uri;
     if (!uri) return;
     const temp = {
       contentType: 'image',
@@ -39,7 +35,9 @@ export default (props: Props) => {
       </Wrapper>
       {textMessage === '' ? (
         <Container>
-          <Camera onPress={onHandlePickImage} />
+          <CameraButton onTakePicture={onHandlePickImage}>
+            <Camera />
+          </CameraButton>
         </Container>
       ) : (
         <Container>
