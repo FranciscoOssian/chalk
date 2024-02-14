@@ -24,11 +24,11 @@ import getFriends from '@src/services/firebase/get/friends';
 import UserType from '@src/types/user';
 
 async function onGoogleButtonPress() {
-  if(auth().currentUser){
+  if (auth().currentUser) {
     await auth().signOut();
   }
   const { idToken } = await signIn();
-  if(!idToken) return;
+  if (!idToken) return;
   const googleCredential = auth.GoogleAuthProvider.credential(idToken);
   const credential = await auth().signInWithCredential(googleCredential);
 
@@ -50,14 +50,13 @@ function SignIn({ navigation }: any) {
   const me = realmContext.useQuery<UserType>('User').filtered(`id == '${myId}'`)[0];
 
   useEffect(() => {
-    AsyncStorage.getItem("my-uid").then(id => {
+    AsyncStorage.getItem('my-uid').then((id) => {
       setMyId(`${id}`);
       if (me) navigation.navigate('/');
     });
   }, [me]);
 
   const onHandleSignIn = async (method: string) => {
-
     if (method === 'email') {
       const isEmailEmpty = email === '';
       const isPasswordEmpty = password === '';
@@ -65,26 +64,25 @@ function SignIn({ navigation }: any) {
       let errorMessage = '';
       let isError = false;
 
-      if(isEmailEmpty){
+      if (isEmailEmpty) {
         errorMessage = errorMessage + `\n- empty email`;
         isError = true;
       }
-      if(isPasswordEmpty){
-        errorMessage = errorMessage + `\n- empty password`
+      if (isPasswordEmpty) {
+        errorMessage = errorMessage + `\n- empty password`;
         isError = true;
       }
-      
-      if(isError) return Alert.alert('Error', errorMessage);
+
+      if (isError) return Alert.alert('Error', errorMessage);
     }
 
     let userCredential: FirebaseAuthTypes.UserCredential | undefined;
 
     switch (method) {
       case 'email':
-        try{
+        try {
           userCredential = await auth().signInWithEmailAndPassword(email, password);
-        }
-        catch(e: any){
+        } catch (e: any) {
           Alert.alert(e.code, e.message);
           return;
         }
@@ -92,8 +90,7 @@ function SignIn({ navigation }: any) {
       case 'google':
         try {
           userCredential = await onGoogleButtonPress();
-        }
-        catch(e){
+        } catch (e) {
           Alert.alert('Error', (e as any).message);
           return;
         }
@@ -116,38 +113,39 @@ function SignIn({ navigation }: any) {
       name: firebaseUser?.name || '',
       age: firebaseUser?.age || 18,
       bio: firebaseUser?.bio || '<bio>',
-      profilePicture: (await fileCache(firebaseUser?.profilePicture || defaultFirebaseProfilePicture, realm)).path,
+      profilePicture: (
+        await fileCache(firebaseUser?.profilePicture || defaultFirebaseProfilePicture, realm)
+      ).path,
       gender: firebaseUser?.gender || 'Prefer not to state',
-      authenticated: firebaseUser?.authenticated || false
-    }
+      authenticated: firebaseUser?.authenticated || false,
+    };
 
     realm.write(() => {
-      realm.create('User', obj)
+      realm.create('User', obj);
     });
 
     AsyncStorage.setItem('my-uid', userCredential.user.uid);
     setMyId(userCredential.user.uid);
 
-    if(!friendsUser) return;
+    if (!friendsUser) return;
 
     for (let friendId of friendsUser) {
-
       const friendUser = await getUser(friendId);
       const chatId = [userCredential.user.uid, friendId].sort().join('-');
-      const getUserHere = (id: string = '') => realm.objectForPrimaryKey<UserType>('User', id)
-      const friendPicture = (await fileCache(friendUser?.profilePicture, realm)).path
+      const getUserHere = (id: string = '') => realm.objectForPrimaryKey<UserType>('User', id);
+      const friendPicture = (await fileCache(friendUser?.profilePicture, realm)).path;
 
       realm.write(() => {
-        if(!friendUser) return;
+        if (!friendUser) return;
         realm.create('User', {
           ...friendUser,
           id: friendId,
-          profilePicture: friendPicture
+          profilePicture: friendPicture,
         });
         realm.create('Chat', {
           id: chatId,
           owners: [getUserHere(userCredential?.user.uid), getUserHere(friendId)],
-          messages: []
+          messages: [],
         });
       });
     }
@@ -157,11 +155,7 @@ function SignIn({ navigation }: any) {
     <ScrollView showsVerticalScrollIndicator={false}>
       <SignTitle>SignIn</SignTitle>
       <SignForm>
-        <SignInput
-          placeholder="Email"
-          onChangeText={setEmail}
-          value={email}
-        />
+        <SignInput placeholder="Email" onChangeText={setEmail} value={email} />
         <SignInput
           secureTextEntry
           placeholder="Password"
@@ -177,7 +171,7 @@ function SignIn({ navigation }: any) {
             style={{
               width: '60%',
               justifyContent: 'space-between',
-              marginBottom: 20,
+              marginBottom: 60,
             }}>
             <Google size={30} color="black" onPress={() => onHandleSignIn('google')} />
             <FaceBook size={30} color="black" />

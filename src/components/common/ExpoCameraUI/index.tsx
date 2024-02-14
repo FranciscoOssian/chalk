@@ -79,10 +79,22 @@ export const Camera = ({ camera, onTakePicture, onCameraClose }: CameraTypes) =>
     run();
   }, [cameraExpoOriginRef]);
 
+  useEffect(() => {
+    const run = async () => {
+      const { status } = await CameraExpoOrigin.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Camera permission not granted');
+        onCameraClose();
+        return;
+      }
+    };
+    run();
+  }, []);
+
   const handleTakePhoto = async () => {
     const { status } = await CameraExpoOrigin.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      console.error('Camera permission not granted');
+      console.log('Camera permission not granted');
       return;
     }
 

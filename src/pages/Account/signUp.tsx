@@ -25,11 +25,11 @@ import { defaultFirebaseProfilePicture } from '@src/utils/consts';
 import getUser from '@src/services/firebase/get/user';
 
 async function onGoogleButtonPress() {
-  if(auth().currentUser){
+  if (auth().currentUser) {
     await auth().signOut();
   }
   const { idToken } = await signIn();
-  if(!idToken) return;
+  if (!idToken) return;
   const googleCredential = auth.GoogleAuthProvider.credential(idToken);
   return auth().signInWithCredential(googleCredential);
 }
@@ -44,7 +44,7 @@ const SignUp = ({ navigation }: any) => {
   const me = realmContext.useQuery('User').filtered(`id == '${myId}'`)[0];
 
   useEffect(() => {
-    AsyncStorage.getItem("my-uid").then(id => {
+    AsyncStorage.getItem('my-uid').then((id) => {
       setMyId(`${id}`);
       if (me) navigation.navigate('/');
     });
@@ -59,17 +59,17 @@ const SignUp = ({ navigation }: any) => {
 
       let errorMessage = '';
 
-      if(isEmailEmpty){
-        errorMessage = errorMessage + `\n- empty email`
+      if (isEmailEmpty) {
+        errorMessage = errorMessage + `\n- empty email`;
       }
-      if(isPasswordEmpty){
-        errorMessage = errorMessage + `\n- empty password`
+      if (isPasswordEmpty) {
+        errorMessage = errorMessage + `\n- empty password`;
       }
-      if(isPasswordRepEmpty){
-        errorMessage = errorMessage + `\n- empty second password (repeat)`
+      if (isPasswordRepEmpty) {
+        errorMessage = errorMessage + `\n- empty second password (repeat)`;
       }
-      if(!isPasswordCheck){
-        errorMessage = errorMessage + `\n- password do not check`
+      if (!isPasswordCheck) {
+        errorMessage = errorMessage + `\n- password do not check`;
       }
 
       if (errorMessage !== '') return Alert.alert('Error', errorMessage);
@@ -79,20 +79,18 @@ const SignUp = ({ navigation }: any) => {
 
     switch (method) {
       case 'email':
-        try{
+        try {
           userCredential = await auth().createUserWithEmailAndPassword(email, password);
-        }
-        catch(e: any){
+        } catch (e: any) {
           Alert.alert(e.code, e.message);
           return;
         }
         break;
       case 'google':
-        try{
+        try {
           userCredential = await onGoogleButtonPress();
-        }
-        catch(e){
-          Alert.alert('', JSON.stringify(e))
+        } catch (e) {
+          Alert.alert('', JSON.stringify(e));
         }
         break;
       case 'facebook':
@@ -107,9 +105,9 @@ const SignUp = ({ navigation }: any) => {
 
     const firebaseUser = await getUser(userCredential.user.uid);
 
-    if(firebaseUser) return Alert.alert("already registered user, error")
+    if (firebaseUser) return Alert.alert('already registered user, error');
 
-    const photoLink = userCredential.user.photoURL || defaultFirebaseProfilePicture
+    const photoLink = userCredential.user.photoURL || defaultFirebaseProfilePicture;
 
     const obj = {
       id: userCredential.user.uid,
@@ -118,10 +116,10 @@ const SignUp = ({ navigation }: any) => {
       bio: '<bio>',
       profilePicture: (await fileCache(photoLink, realm)).path,
       gender: 'Prefer not to state',
-      authenticated: false
-    }
+      authenticated: false,
+    };
 
-    setUser({ user: {...obj, profilePicture: photoLink} });
+    setUser({ user: { ...obj, profilePicture: photoLink } });
 
     realm.write(() => realm.create('User', obj));
 
@@ -133,11 +131,7 @@ const SignUp = ({ navigation }: any) => {
     <>
       <SignTitle>SignUp</SignTitle>
       <SignForm>
-        <SignInput
-          placeholder="Email"
-          onChangeText={setEmail}
-          value={email}
-        />
+        <SignInput placeholder="Email" onChangeText={setEmail} value={email} />
         <SignInput
           secureTextEntry
           placeholder="Password"
@@ -159,6 +153,7 @@ const SignUp = ({ navigation }: any) => {
             style={{
               width: '60%',
               justifyContent: 'space-between',
+              marginBottom: 60,
             }}>
             <Google size={30} color="black" onPress={() => onHandleSignUp('google')} />
             <FaceBook size={30} color="black" />

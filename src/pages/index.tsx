@@ -1,4 +1,5 @@
 import styled from 'styled-components/native';
+import analytics from '@react-native-firebase/analytics';
 
 import ThemeProvider from '@providers/theme';
 import NewChalk from '@components/common/NewChalk';
@@ -8,6 +9,8 @@ import Head from '@components/pages/Home/Head';
 import useUser from '@src/hooks/useUser';
 import useChats from '@src/hooks/useChats';
 import getUser from '@src/services/firebase/get/user';
+
+import localStorage from '@src/services/localStorage';
 
 import realmContext from '@contexts/realm';
 import UserType from '@src/types/user';
@@ -55,12 +58,22 @@ function Home({ navigation }: any) {
       <NewChalk
         onPress={async () => {
           const homeChalkBntAd = remoteConfig().getValue('HomeChalkBntAd');
+          const matchingConfig = await localStorage('matchingConfig').get();
+          const goTo = () => {
+            analytics().logEvent('new_chalk_clicked', {
+              uid: me?.id,
+              gender: me?.gender,
+              age: me?.age,
+              matchingConfig,
+            });
+            navigation.navigate('/newChalk');
+          };
           if (homeChalkBntAd.asBoolean()) {
             showAd({
-              onLoad: () => navigation.navigate('/newChalk'),
+              onLoad: goTo,
             });
           } else {
-            navigation.navigate('/newChalk');
+            goTo();
           }
         }}
       />
