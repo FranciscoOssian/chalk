@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import Snackbar from 'react-native-snackbar';
 import auth from '@react-native-firebase/auth';
 import Constants from 'expo-constants';
+import RNAdvertisingId from 'react-native-advertising-id';
 
 import useUser from '@src/hooks/useUser';
 import useMyId from '@src/hooks/useMyId';
@@ -238,10 +239,12 @@ function Profile({ navigation, route }: any) {
         <ButtonRow
           title={t('soft ban')}
           onPress={async () => {
-            //if (!user?.id) return;
-            const installationId = Constants.installationId;
-            console.log(installationId);
-            //// await delUser(user.id);
+            RNAdvertisingId.getAdvertisingId()
+              .then((response) => {
+                console.log(response.isLimitAdTrackingEnabled, response.advertisingId);
+                Alert.alert(`${response.isLimitAdTrackingEnabled}`, response.advertisingId);
+              })
+              .catch((error) => console.error(error));
           }}
         />
       </BlockButtons>

@@ -26,3 +26,6 @@ ios/
 
 # Jest
 coverage/
+
+# yarn
+yarn-error.log

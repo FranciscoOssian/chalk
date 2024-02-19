@@ -13,6 +13,8 @@ export const Message = styled.View<{
 }>`
   background-color: ${(p) => (p.my ? p.theme.colors.primary : 'rgba(0, 0, 0, 0.06)')};
 
+  border: 1px solid ${(p) => (p.my ? p.theme.colors.primary : 'rgba(0, 0, 0, 0)')};
+
   min-width: 50%;
   max-width: 90%;
   width: auto;
@@ -47,7 +49,7 @@ export const Txt = styled.Text<{ my: My }>`
 `;
 
 export const Img = styled.View`
-  background-color: red;
+  background-color: transparent;
   width: 50%;
   justify-content: center;
   align-items: center;
