@@ -3,12 +3,23 @@ import React from 'react';
 import Image from '../../../common/Image';
 import { Message as Wrapper, Txt, Img, Conteiner } from './styles';
 
-const Message = ({ item, onImagePress, myId }) => {
+const Message = ({ item, onImagePress, myId, nextIsAnother, backIsAnother }: any) => {
   const yourMessage = item.from === myId;
+
+  console.log(
+    item.from[0],
+    item.content.contentType === 'image' ? 'image' : item.content.value,
+    nextIsAnother,
+    backIsAnother
+  );
 
   return (
     <Conteiner my={yourMessage}>
-      <Wrapper my={yourMessage} type={item.content.contentType}>
+      <Wrapper
+        my={yourMessage}
+        type={item.content.contentType}
+        nextIsAnother={nextIsAnother}
+        backIsAnother={backIsAnother}>
         {item.content.contentType === 'image' ? (
           <Img>
             <Image uri={item.content.value} width="100%" square onPress={onImagePress} />

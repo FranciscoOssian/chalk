@@ -24,6 +24,7 @@ function Home({ navigation, route }: any) {
   const nav = useNavigation();
 
   const chat = useChats(chatName)[0];
+  const [messages, setMessages] = useState(chat?.messages ?? []);
 
   const realm = realmContext.useRealm();
 
@@ -56,6 +57,7 @@ function Home({ navigation, route }: any) {
     const run = async () => {
       if (!chat?.id) return;
       await AsyncStorage.setItem('currentOpenedChat', chat?.id);
+      setMessages(chat?.messages.slice().sort((a: any, b: any) => b.timestamp - a.timestamp));
     };
     run();
     return () => {
@@ -74,18 +76,22 @@ function Home({ navigation, route }: any) {
         onVideoCallPress={() => {}}
       />
       <ChatList
-        data={chat?.messages.slice().sort((a: any, b: any) => b.timestamp - a.timestamp)}
-        renderItem={({ item }: any) => (
-          <Message
-            item={item}
-            myId={me.id}
-            onImagePress={
-              item.content.contentType === 'image'
-                ? () => nav.navigate('/image' as never, { list: [item.content.value] } as never)
-                : () => {}
-            }
-          />
-        )}
+        data={messages}
+        renderItem={({ item, index }: any) => {
+          return (
+            <Message
+              item={item}
+              myId={me.id}
+              nextIsAnother={item?.from !== messages[index + 1]?.from}
+              backIsAnother={item?.from !== messages[index - 1]?.from}
+              onImagePress={
+                item.content.contentType === 'image'
+                  ? () => nav.navigate('/image' as never, { list: [item.content.value] } as never)
+                  : () => {}
+              }
+            />
+          );
+        }}
         keyExtractor={(item) => (item as any).id}
         inverted
       />

@@ -5,7 +5,7 @@ import theme from '@src/styles/theme';
 const SendIcon = ({ onPress }) => {
   return (
     <Touch onPress={onPress}>
-      <Ionicons name="send-sharp" size={30} color={theme.colors.primary} />
+      <Ionicons name="send-sharp" size={30} color={theme.colors.background} />
     </Touch>
   );
 };

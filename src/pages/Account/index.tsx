@@ -9,6 +9,7 @@ import SafeArea from '@components/common/SafeArea';
 import { useTranslation } from 'react-i18next';
 import Snackbar from 'react-native-snackbar';
 import auth from '@react-native-firebase/auth';
+import Constants from 'expo-constants';
 
 import useUser from '@src/hooks/useUser';
 import useMyId from '@src/hooks/useMyId';
@@ -233,11 +234,13 @@ function Profile({ navigation, route }: any) {
         />
       </BlockButtons>
 
-      <BlockButtons title={t('Admin')} hidden={hiddenInFriendPage}>
+      <BlockButtons title={t('Admin')} hidden={hiddenInMyPage}>
         <ButtonRow
           title={t('soft ban')}
           onPress={async () => {
             //if (!user?.id) return;
+            const installationId = Constants.installationId;
+            console.log(installationId);
             //// await delUser(user.id);
           }}
         />
