@@ -4,6 +4,14 @@ type My = boolean;
 type Type = 'image' | 'text';
 type Theme = any;
 
+/*
+  border-top-left-radius: ${(p) => (p.nextIsAnother ? 14 : 0)}px;
+  border-top-right-radius: ${(p) => (p.nextIsAnother ? 14 : 0)}px;
+
+  border-bottom-left-radius: ${(p) => (p.backIsAnother ? (p.my ? 14 : 0) : 0)}px;
+  border-bottom-right-radius: ${(p) => (p.backIsAnother ? (p.my ? 0 : 14) : 0)}px;
+*/
+
 export const Message = styled.View<{
   my: My;
   type: Type;
@@ -28,14 +36,19 @@ export const Message = styled.View<{
 
   padding: ${(p) => (p.type === 'image' ? 0 : 10)}px;
 
-  border-top-left-radius: ${(p) => (p.nextIsAnother ? 14 : 0)}px;
-  border-top-right-radius: ${(p) => (p.nextIsAnother ? 14 : 0)}px;
+  border-radius: 14px;
 
-  border-bottom-left-radius: ${(p) => (p.backIsAnother ? (p.my ? 14 : 0) : 0)}px;
-  border-bottom-right-radius: ${(p) => (p.backIsAnother ? (p.my ? 0 : 14) : 0)}px;
+  border-bottom-right-radius: ${(p) => (p.my ? 0 : 14)}px;
+  border-top-right-radius: ${(p) => (p.my ? 0 : 14)}px;
+
+  border-bottom-left-radius: ${(p) => (p.my ? 14 : 0)}px;
+  border-top-left-radius: ${(p) => (p.my ? 14 : 0)}px;
+
+  border-top-right-radius: ${(p) => (p.my ? (p.nextIsAnother ? 14 : 0) : 14)}px;
+  border-top-left-radius: ${(p) => (!p.my ? (p.nextIsAnother ? 14 : 0) : 14)}px;
 
   justify-content: center;
-  align-items: flex-start;
+  align-items: ${(p) => (p.my ? 'flex-start' : p.type === 'image' ? 'flex-end' : 'flex-start')};
 `;
 
 export const Txt = styled.Text<{ my: My }>`
