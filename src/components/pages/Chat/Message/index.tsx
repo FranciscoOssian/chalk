@@ -6,13 +6,6 @@ import { Message as Wrapper, Txt, Img, Conteiner } from './styles';
 const Message = ({ item, onImagePress, myId, nextIsAnother, backIsAnother }: any) => {
   const yourMessage = item.from === myId;
 
-  console.log(
-    item.from[0],
-    item.content.contentType === 'image' ? 'image' : item.content.value,
-    nextIsAnother,
-    backIsAnother
-  );
-
   return (
     <Conteiner my={yourMessage}>
       <Wrapper

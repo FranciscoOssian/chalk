@@ -23,7 +23,7 @@ async function matchListener(
   callback: (friend: UserType & { uid: string }) => void,
   realm: Realm
 ) {
-  const socket = io('https://chalk-matching-system.onrender.com');
+  const socket = io('https://chalk-system.onrender.com');
   const matchingConfig = await localStorage('matchingConfig').get();
 
   const meToSend = {
@@ -36,6 +36,8 @@ async function matchListener(
     authenticated: me.authenticated,
     matchingConfig,
   };
+
+  console.log(meToSend);
 
   socket.on('connect', async () => {
     socket.emit('add_user', meToSend);
