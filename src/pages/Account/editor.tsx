@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import * as FileSystem from 'expo-file-system';
 import styled from 'styled-components/native';
 import { useTranslation } from 'react-i18next';
 
@@ -17,36 +16,12 @@ import useUser from '@hooks/useUser';
 import setFireUser from '@services/firebase/set/user';
 import setProfileImage from '@services/firebase/set/profileImage';
 
-import { fileCache } from '@src/services/realm/fileCache';
+import { classifyImage } from '@src/services/chalkSystem';
 
 import realmContext from '@contexts/realm';
 import Done from '@src/components/pages/Account/Done';
 import Back from '@src/components/common/Back';
-
-const classifyImage = async (
-  uri: string
-): Promise<{ className: string; probability: number }[]> => {
-  try {
-    const response = await FileSystem.uploadAsync(
-      'https://nsfw-img-detect-node.onrender.com/classify',
-      uri,
-      {
-        fieldName: 'image',
-        httpMethod: 'POST',
-        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-      }
-    );
-
-    return JSON.parse(response.body);
-  } catch (error) {
-    console.error('Error classifying image:', error);
-    Snackbar.show({
-      text: 'Error, Failed to classify image',
-      duration: Snackbar.LENGTH_SHORT,
-    });
-    return [];
-  }
-};
+import { matchingConfig } from '@src/services/localStorage/defaults';
 
 const isNSFW = async (uri: string) => {
   const api_classes = await classifyImage(uri);
@@ -85,6 +60,7 @@ function MyProfile({ navigation }: any) {
     profilePicture: defaultFirebaseProfilePicture,
     authenticated: false,
     gender: '',
+    matchingConfig: matchingConfig,
   });
 
   const realm = realmContext.useRealm();
@@ -96,14 +72,15 @@ function MyProfile({ navigation }: any) {
 
   useEffect(() => {
     if (!me) return;
-    const { profilePicture, name, age, bio, gender } = me;
+    const { profilePicture, name, age, bio, gender, matchingConfig } = me;
     setNewMe({
       profilePicture,
       name,
       bio,
       age,
       gender,
-    });
+      matchingConfig,
+    } as UserType);
   }, [me]);
 
   const [_, pick] = usePicker({ base64: false });
@@ -117,7 +94,6 @@ function MyProfile({ navigation }: any) {
 
   const onHandleDone = async () => {
     if (!me.id || newMe === me) return;
-    let cached: string | null = null;
     try {
       let imgFire = '';
       if (me.profilePicture !== newMe.profilePicture) {
@@ -128,7 +104,6 @@ function MyProfile({ navigation }: any) {
           user: { ...newMe, profilePicture: imgFire },
           update: true,
         });
-        cached = (await fileCache(imgFire, realm)).path;
       } else {
         const { profilePicture, ...userMe } = me;
         setFireUser({
@@ -139,7 +114,7 @@ function MyProfile({ navigation }: any) {
       realm.write(() => {
         const usr = realm.objectForPrimaryKey<UserType>('User', me.id || '');
         if (!usr) return;
-        if (cached) usr.profilePicture = cached;
+        usr.profilePicture = newMe.profilePicture;
         usr.name = newMe.name;
         usr.age = newMe.age;
         usr.name = newMe.name;

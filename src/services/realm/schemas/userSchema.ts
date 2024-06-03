@@ -9,6 +9,7 @@ const userSchema = {
     profilePicture: 'string',
     authenticated: 'bool',
     gender: 'string?',
+    matchingConfig: 'MatchingConfig',
   },
 };
 

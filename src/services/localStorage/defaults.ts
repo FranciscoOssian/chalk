@@ -1,10 +1,10 @@
 import { getLocales } from 'expo-localization';
 
-const appLanguage = getLocales()[0].languageTag;
+export const appLanguage = getLocales()[0].languageTag;
 
-const genders = ['Woman', 'Man', 'Transgender', 'Non-Binary', 'Prefer not to state'];
+export const genders = ['Woman', 'Man', 'Transgender', 'Non-Binary', 'Prefer not to state'];
 
-const matchingConfig = {
+export const matchingConfig = {
   from: 18,
   to: 18,
   lang: appLanguage,

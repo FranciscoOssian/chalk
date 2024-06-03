@@ -2,7 +2,8 @@
   "en": {
     "translation": {
       "welcomeMessageTitle": "Welcome to our app!",
-      "welcomeMessageBody": "We're excited to have you here. As you're among the first to try our app, your input is especially important to us. Please be aware that we're still in the testing phase, so you might encounter some instability. If this happens, we apologize and appreciate your patience. If you have any feedback or suggestions, we would love to hear."
+      "welcomeMessageBody": "We're excited to have you here. As you're among the first to try our app, your input is especially important to us. Please be aware that we're still in the testing phase, so you might encounter some instability. If this happens, we apologize and appreciate your patience. If you have any feedback or suggestions, we would love to hear.",
+      "matchLanguageText": "Seek only speakers of"
     }
   },
   "pt": {
@@ -40,7 +41,13 @@
 
       "welcomeMessageTitle": "Bem-vindo ao nosso aplicativo!",
       "welcomeMessageBody": "Estamos entusiasmados por ter você aqui. Como você está entre os primeiros a experimentar nosso aplicativo, sua opinião é especialmente importante para nós. Por favor, esteja ciente de que ainda estamos em fase de teste, então você pode encontrar algumas instabilidades. Se isso acontecer, pedimos desculpas e agradecemos sua paciência. Se você tiver algum feedback ou sugestões, adoraríamos ouvir.",
-      "Visit us on TikTok": "Visite-nos no TikTok"
+      "Visit us on TikTok": "Visite-nos no TikTok",
+
+      "age": "idade",
+      "gender": "gênero",
+      "match config": "configurações de matching",
+      "matchLanguageText": "buscar apenas falantes de",
+      "searching...": "buscando..."
     }
   }
 }

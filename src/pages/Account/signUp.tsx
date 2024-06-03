@@ -20,9 +20,10 @@ import realmContext from '@contexts/realm';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import setUser from '@src/services/firebase/set/user';
-import { fileCache } from '@src/services/realm/fileCache';
 import { defaultFirebaseProfilePicture } from '@src/utils/consts';
 import getUser from '@src/services/firebase/get/user';
+import { matchingConfig } from '@src/services/localStorage/defaults';
+import createRealmUser from '@src/services/realm/create/user';
 
 async function onGoogleButtonPress() {
   if (auth().currentUser) {
@@ -42,7 +43,6 @@ const SignUp = ({ navigation }: any) => {
 
   const [myId, setMyId] = useState('');
   const me = realmContext.useQuery('User').filtered(`id == '${myId}'`)[0];
-
   useEffect(() => {
     AsyncStorage.getItem('my-uid').then((id) => {
       setMyId(`${id}`);
@@ -114,14 +114,14 @@ const SignUp = ({ navigation }: any) => {
       name: userCredential.user.displayName || 'Anon',
       age: 18,
       bio: '<bio>',
-      profilePicture: (await fileCache(photoLink, realm)).path,
+      profilePicture: photoLink ?? defaultFirebaseProfilePicture,
       gender: 'Prefer not to state',
       authenticated: false,
+      matchingConfig: matchingConfig,
     };
 
     setUser({ user: { ...obj, profilePicture: photoLink } });
-
-    realm.write(() => realm.create('User', obj));
+    createRealmUser(realm, obj);
 
     AsyncStorage.setItem('my-uid', userCredential.user.uid);
     setMyId(userCredential.user.uid);

@@ -12,6 +12,8 @@ import { startBackgroundFetch } from '@services/background';
 import useAppState from '@src/hooks/useAppState';
 import { useNetInfo } from '@react-native-community/netinfo';
 import LottieView from 'lottie-react-native';
+import { matchListener } from '@src/services/chalkSystem';
+import { initMatching } from '@src/utils/backgroundPublishMatch';
 
 const { RealmProvider } = realmContext;
 
@@ -42,8 +44,15 @@ function SplashScreenComp() {
   );
 }
 
-const BACKGROUND_FETCH_TASK = 'fetch-new-messages-store-and-notify';
-startBackgroundFetch(BACKGROUND_FETCH_TASK, async () => {
+const BACKGROUND_FETCH_TASK_1 = 'publish-account-and-await-to-maitch';
+startBackgroundFetch(BACKGROUND_FETCH_TASK_1, async () => {
+  initMatching();
+});
+
+initMatching();
+
+const BACKGROUND_FETCH_TASK_2 = 'fetch-new-messages-store-and-notify';
+startBackgroundFetch(BACKGROUND_FETCH_TASK_2, async () => {
   iterateOverChats();
 });
 

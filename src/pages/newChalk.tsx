@@ -10,44 +10,11 @@ import Info from '@components/pages/newChalk/Info';
 import useUser from '@hooks/useUser';
 import { defaultFirebaseProfilePicture } from '@src/utils/consts';
 
-import localStorage from '@src/services/localStorage';
 import UserType from '@src/types/user';
-import { io } from 'socket.io-client';
-import { fileCache } from '@src/services/realm/fileCache';
+import { matchListener } from '@src/services/chalkSystem';
 
 import realmContext from '@contexts/realm';
 import updateFriends from '@src/services/firebase/update/friends';
-
-async function matchListener(
-  me: UserType,
-  callback: (friend: UserType & { uid: string }) => void,
-  realm: Realm
-) {
-  const socket = io('https://chalk-system.onrender.com');
-  const matchingConfig = await localStorage('matchingConfig').get();
-
-  const meToSend = {
-    name: me.name,
-    bio: me.bio,
-    age: me.age,
-    gender: me.gender,
-    uid: me.id,
-    profilePicture: (await fileCache(me.profilePicture, realm)).path,
-    authenticated: me.authenticated,
-    matchingConfig,
-  };
-
-  console.log(meToSend);
-
-  socket.on('connect', async () => {
-    socket.emit('add_user', meToSend);
-    socket.on('match', callback);
-  });
-
-  return () => {
-    socket.disconnect();
-  };
-}
 
 const onHandleNewFriend = (realm: Realm, me: UserType, friend: UserType & { uid: string }) => {
   const chatId = [me.id, friend.uid].sort().join('-');

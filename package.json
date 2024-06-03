@@ -40,6 +40,7 @@
     "@realm/react": "^0.4.3",
     "axios": "^1.4.0",
     "expo": "~48.0.21",
+    "expo-asset": "~8.9.1",
     "expo-background-fetch": "^11.1.1",
     "expo-camera": "~13.2.1",
     "expo-constants": "~14.2.1",

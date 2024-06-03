@@ -14,7 +14,6 @@ import SignForm from '@components/pages/Account/SignForm';
 import SignInput from '@components/pages/Account/SignInput';
 import SignTitle from '@components/pages/Account/SignTitle';
 import { signIn } from '@services/rn-google-signin';
-import { fileCache } from '@src/services/realm/fileCache';
 
 import realmContext from '@contexts/realm';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,6 +21,9 @@ import { defaultFirebaseProfilePicture } from '@src/utils/consts';
 import getUser from '@src/services/firebase/get/user';
 import getFriends from '@src/services/firebase/get/friends';
 import UserType from '@src/types/user';
+import { matchingConfig } from '@src/services/localStorage/defaults';
+import createRealmUser from '@src/services/realm/create/user';
+import setUser from '@src/services/firebase/set/user';
 
 async function onGoogleButtonPress() {
   if (auth().currentUser) {
@@ -48,7 +50,6 @@ function SignIn({ navigation }: any) {
 
   const [myId, setMyId] = useState('');
   const me = realmContext.useQuery<UserType>('User').filtered(`id == '${myId}'`)[0];
-
   useEffect(() => {
     AsyncStorage.getItem('my-uid').then((id) => {
       setMyId(`${id}`);
@@ -108,21 +109,52 @@ function SignIn({ navigation }: any) {
     const firebaseUser = await getUser(userCredential.user.uid);
     const friendsUser = await getFriends(userCredential.user.uid);
 
+    /*const matchingConfigObj = {
+      id: userCredential.user.uid,
+      ...(firebaseUser?.matchingConfig || matchingConfig),
+    };
+
     const obj = {
       id: userCredential.user.uid,
       name: firebaseUser?.name || '',
       age: firebaseUser?.age || 18,
       bio: firebaseUser?.bio || '<bio>',
       profilePicture: (
-        await fileCache(firebaseUser?.profilePicture || defaultFirebaseProfilePicture, realm)
+        await j(firebaseUser?.profilePicture || defaultFirebaseProfilePicture, realm)
       ).path,
       gender: firebaseUser?.gender || 'Prefer not to state',
       authenticated: firebaseUser?.authenticated || false,
     };
 
     realm.write(() => {
-      realm.create('User', obj);
-    });
+      realm.create('MatchingConfig', matchingConfigObj);
+      realm.create('User', {
+        ...obj,
+        matchingConfig: realm.objectForPrimaryKey('MatchingConfig', obj.id),
+      });
+    });*/
+
+    const obj = {
+      id: userCredential.user.uid,
+      name: firebaseUser?.name || '',
+      age: firebaseUser?.age || 18,
+      bio: firebaseUser?.bio || '<bio>',
+      profilePicture: firebaseUser?.profilePicture || defaultFirebaseProfilePicture,
+      gender: firebaseUser?.gender || 'Prefer not to state',
+      authenticated: firebaseUser?.authenticated || false,
+    };
+
+    if (!firebaseUser?.gender)
+      // temporaly
+      setUser({
+        user: { ...firebaseUser, gender: 'Prefer not to state' } as UserType,
+      });
+
+    if (!firebaseUser?.matchingConfig)
+      // temporaly
+      setUser({ user: { ...firebaseUser, matchingConfig: matchingConfig } });
+
+    createRealmUser(realm, { ...obj, matchingConfig });
 
     AsyncStorage.setItem('my-uid', userCredential.user.uid);
     setMyId(userCredential.user.uid);
@@ -133,15 +165,25 @@ function SignIn({ navigation }: any) {
       const friendUser = await getUser(friendId);
       const chatId = [userCredential.user.uid, friendId].sort().join('-');
       const getUserHere = (id: string = '') => realm.objectForPrimaryKey<UserType>('User', id);
-      const friendPicture = (await fileCache(friendUser?.profilePicture, realm)).path;
+      const friendPicture = friendUser?.profilePicture ?? defaultFirebaseProfilePicture;
+
+      console.log(friendId);
+
+      await createRealmUser(realm, {
+        id: friendId,
+        name: friendUser?.name ?? '',
+        age: friendUser?.age ?? 1,
+        gender: friendUser?.gender ?? '',
+        profilePicture: friendPicture ?? '',
+        matchingConfig: {
+          to: friendUser?.matchingConfig?.to ?? 1,
+          from: friendUser?.matchingConfig?.from ?? 1,
+          lang: friendUser?.matchingConfig?.lang ?? '',
+          genders: friendUser?.matchingConfig?.genders ?? [],
+        },
+      });
 
       realm.write(() => {
-        if (!friendUser) return;
-        realm.create('User', {
-          ...friendUser,
-          id: friendId,
-          profilePicture: friendPicture,
-        });
         realm.create('Chat', {
           id: chatId,
           owners: [getUserHere(userCredential?.user.uid), getUserHere(friendId)],

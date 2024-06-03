@@ -9,7 +9,6 @@ import SafeArea from '@components/common/SafeArea';
 import { useTranslation } from 'react-i18next';
 import Snackbar from 'react-native-snackbar';
 import auth from '@react-native-firebase/auth';
-import Constants from 'expo-constants';
 import RNAdvertisingId from 'react-native-advertising-id';
 
 import useUser from '@src/hooks/useUser';
@@ -37,6 +36,7 @@ import Row from '@src/components/common/Row';
 import removeFriendOfList from '@src/services/firebase/del/friendOfList';
 import deleteEntireDatabase from '@src/services/realm/delete/deleteEntireDatabase';
 import delUser from '@src/services/firebase/del/user';
+import setUser from '@src/services/firebase/set/user';
 
 function Profile({ navigation, route }: any) {
   const user = useUser(route.params.id);
@@ -50,10 +50,10 @@ function Profile({ navigation, route }: any) {
   const { t: translation, i18n } = useTranslation();
   const t = (s: string) => translation<string>(s);
 
-  const [appLanguage, setAppLanguage] = useState('');
-  const [matchConfig, setMatchConfig] = useMatchConfig();
-
   const realm = realmContext.useRealm();
+
+  const [appLanguage, setAppLanguage] = useState('');
+  const { matchConfig, setMatchConfig } = useMatchConfig();
 
   const onHandleSetAppLanguage = async (s: string) => {
     setAppLanguage(s);
@@ -61,8 +61,27 @@ function Profile({ navigation, route }: any) {
     i18n.changeLanguage(s);
   };
 
+  const me = useUser();
+
   const onHandleSetMatchConfig = async (config: MatchConfigType) => {
-    setMatchConfig(config);
+    config = { ...config, ...matchConfig };
+    setMatchConfig({
+      from: config.from ?? me.matchingConfig.from,
+      to: config.to ?? me.matchingConfig.to,
+      genders: config.genders ?? me.matchingConfig.genders,
+      lang: config.lang ?? me.matchingConfig.lang,
+    });
+    setUser({
+      user: {
+        matchingConfig: {
+          from: config.from ?? me.matchingConfig.from,
+          to: config.to ?? me.matchingConfig.to,
+          genders: config.genders ?? me.matchingConfig.genders,
+          lang: config.lang ?? me.matchingConfig.lang,
+        },
+      },
+      update: true,
+    });
   };
 
   useEffect(() => {
@@ -98,7 +117,7 @@ function Profile({ navigation, route }: any) {
       </BlockButtons>
 
       <BlockButtons title={t('match config')} hidden={hiddenInFriendPage}>
-        <ButtonRow mode={{ type: 'accordion', height: 100 }} title="age">
+        <ButtonRow mode={{ type: 'accordion', height: 100 }} title={t('age')}>
           <AgePicker
             initial={{ from: matchConfig.from, to: matchConfig.to }}
             callback={({ to, from }) => {
@@ -109,16 +128,16 @@ function Profile({ navigation, route }: any) {
             }}
           />
         </ButtonRow>
-        <ButtonRow mode={{ type: 'accordion', height: 50 }} title="gender">
+        <ButtonRow mode={{ type: 'accordion', height: 50 }} title={t('gender')}>
           <GenderPicker
-            initial={matchConfig.genders}
+            initial={[...matchConfig.genders]}
             callback={(seleteds) => onHandleSetMatchConfig({ ...matchConfig, genders: seleteds })}
           />
         </ButtonRow>
 
         <ButtonRow
           mode={{ type: 'accordion', height: 50 }}
-          title={`${t('Match language')} (${t('current')} - ${matchConfig.lang})`}>
+          title={`${t('matchLanguageText')} (${t('current')} - ${matchConfig.lang})`}>
           <PickerMatchLanguage
             initial={matchConfig.lang}
             callback={(seleted) => onHandleSetMatchConfig({ ...matchConfig, lang: seleted })}

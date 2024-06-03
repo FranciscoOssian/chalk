@@ -6,11 +6,9 @@ import getRealm from '@services/realm/getRealm';
 import ChatType from '@src/types/chat';
 
 import getChatMediaLink from '@src/services/firebase/get/chatMediaLink';
-import { fileCache } from '@src/services/realm/fileCache';
 
 import listenToChatQueue from '@services/firebase/listeners/chatQueue';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import messages from '@src/services/realm/create/messages';
 
 let lastNotifications: any = {};
@@ -29,8 +27,7 @@ const getOnFireBase = async (chat: ChatType, myId: string, realm: Realm) => {
         let value = msg.content.value;
         if (msg.content.type === 'image') {
           const external = await getChatMediaLink(chat.id, msg.content.value);
-          const cached = await fileCache(external.url, realm);
-          value = cached.path;
+          value = external.url;
           external.delete();
         }
         return {
@@ -47,12 +44,14 @@ const getOnFireBase = async (chat: ChatType, myId: string, realm: Realm) => {
 
     queueRef.set([]);
 
-    const chatId = await AsyncStorage.getItem(`currentOpenedChat`);
+    //const chatId = await AsyncStorage.getItem(`currentOpenedChat`);
 
     if (AppState.currentState === 'active') {
-      if (chatId === chat?.id) {
-        return;
-      }
+      return;
+      console.log('kjbefjk');
+      //if (chatId === chat?.id) {
+      //  return;
+      //}
     }
 
     lastMessages.map((msg: any) => {
