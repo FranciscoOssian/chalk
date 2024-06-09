@@ -26,8 +26,6 @@ import { match } from '@src/services/chalkSystem';
 import updateFriends from '@src/services/firebase/update/friends';
 import createNotification from '@src/services/firebase/create/notification';
 import createRealmUser from '@src/services/realm/create/user';
-import { io } from 'socket.io-client';
-import useMatchConfig from '@src/hooks/useMatchConfig';
 
 let onSearch = false;
 
@@ -36,14 +34,11 @@ function Home({ navigation }: any) {
   const [isModalVisible, setModalVisible] = useState(false);
   const chats = useChats();
   const me = useUser();
-  const [searchFunction, setSearchFunction] = useState<number>(0);
 
   const realm = realmContext.useRealm();
 
   const { t: translation, i18n } = useTranslation();
   const t = (s: string) => translation<string>(s);
-
-  const { matchConfig } = useMatchConfig();
 
   const search = async () => {
     console.log('go');

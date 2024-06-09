@@ -12,9 +12,9 @@ import { Head as Wrapper } from './styles';
 import UserType from '@src/types/user';
 
 interface PropTypes {
-  onProfilePress: () => void
-  onBackPress: () => void
-  user: UserType
+  onProfilePress: () => void;
+  onBackPress: () => void;
+  user: UserType;
 }
 
 /**
@@ -33,9 +33,9 @@ const Head = ({ onProfilePress, onBackPress, user }: PropTypes) => {
       <Row>
         <Name>{user.name}</Name>
         {user.authenticated ? <Verified /> : null}
+        <Age>{user.age}y</Age>
       </Row>
-      <Age>{user.age}</Age>
-      <Bio>{user.bio}</Bio>
+      <Bio>bio:{user.bio}</Bio>
     </Wrapper>
   );
 };

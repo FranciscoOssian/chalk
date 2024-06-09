@@ -14,7 +14,7 @@ const useUser = (priorityUserId?: string) => {
 
   useEffect(() => {
     if (!priorityUserId) {
-      AsyncStorage.getItem("my-uid").then(id => {
+      AsyncStorage.getItem('my-uid').then((id) => {
         setId(`${id}`);
       });
     }

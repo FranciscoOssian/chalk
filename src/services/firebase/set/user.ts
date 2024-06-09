@@ -22,7 +22,13 @@ export default async function setUser({ user, update }: Params): Promise<void> {
     age: user?.age ?? 0,
     bio: user?.bio ?? '',
     authenticated: user?.authenticated ?? false,
-    matchingConfig: user?.matchingConfig ?? matchingConfig,
+    matchingConfig:
+      {
+        from: user?.matchingConfig?.from,
+        to: user?.matchingConfig?.to,
+        genders: user?.matchingConfig?.genders,
+        lang: user?.matchingConfig?.lang,
+      } ?? matchingConfig,
     gender: user?.gender ?? 'Prefer not to state',
   });
 }

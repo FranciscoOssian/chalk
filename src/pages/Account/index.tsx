@@ -76,7 +76,7 @@ function Profile({ navigation, route }: any) {
         matchingConfig: {
           from: config.from ?? me.matchingConfig.from,
           to: config.to ?? me.matchingConfig.to,
-          genders: config.genders ?? me.matchingConfig.genders,
+          genders: config.genders ?? JSON.parse(JSON.stringify(me.matchingConfig.genders)),
           lang: config.lang ?? me.matchingConfig.lang,
         },
       },

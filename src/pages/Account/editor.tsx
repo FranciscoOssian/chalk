@@ -21,14 +21,13 @@ import { classifyImage } from '@src/services/chalkSystem';
 import realmContext from '@contexts/realm';
 import Done from '@src/components/pages/Account/Done';
 import Back from '@src/components/common/Back';
-import { matchingConfig } from '@src/services/localStorage/defaults';
+import { matchingConfig as defaultMatchingConfig } from '@src/services/localStorage/defaults';
 
-const isNSFW = async (uri: string) => {
+const isNSFW = async (uri: string): Promise<boolean | undefined> => {
+  console.log(uri);
   const api_classes = await classifyImage(uri);
 
-  console.log(api_classes);
-
-  if (api_classes.length === 0) return;
+  if (api_classes.length === 0) return undefined;
 
   const classes = {
     porn: api_classes.find((c) => c.className === 'Porn'),
@@ -60,7 +59,7 @@ function MyProfile({ navigation }: any) {
     profilePicture: defaultFirebaseProfilePicture,
     authenticated: false,
     gender: '',
-    matchingConfig: matchingConfig,
+    matchingConfig: defaultMatchingConfig,
   });
 
   const realm = realmContext.useRealm();
@@ -79,60 +78,54 @@ function MyProfile({ navigation }: any) {
       bio,
       age,
       gender,
-      matchingConfig,
+      matchingConfig: {
+        from: matchingConfig.from,
+        to: matchingConfig.to,
+        genders: matchingConfig.genders,
+        lang: matchingConfig.lang,
+      },
     } as UserType);
   }, [me]);
 
   const [_, pick] = usePicker({ base64: false });
 
   const onSetterUser = (prop: string, value: any) => {
-    if (!value) return;
+    if (!value || !prop) return;
     const temp: any = newMe;
     temp[prop] = value;
-    setNewMe((temp) => ({ ...temp, prop: value }));
+    setNewMe((temp) => ({ ...temp }));
   };
 
   const onHandleDone = async () => {
     if (!me.id || newMe === me) return;
-    try {
-      let imgFire = '';
-      if (me.profilePicture !== newMe.profilePicture) {
-        if (!newMe.profilePicture) return;
-        const resp = setProfileImage(me.id, newMe.profilePicture);
-        imgFire = (await resp).url;
-        setFireUser({
-          user: { ...newMe, profilePicture: imgFire },
-          update: true,
-        });
-      } else {
-        const { profilePicture, ...userMe } = me;
-        setFireUser({
-          user: userMe,
-          update: true,
-        });
-      }
-      realm.write(() => {
-        const usr = realm.objectForPrimaryKey<UserType>('User', me.id || '');
-        if (!usr) return;
-        usr.profilePicture = newMe.profilePicture;
-        usr.name = newMe.name;
-        usr.age = newMe.age;
-        usr.name = newMe.name;
-        usr.gender = newMe.gender;
-        usr.bio = newMe.bio;
-      });
-    } catch (error) {
-      Snackbar.show({
-        text: t('Error updating profile'),
-        duration: Snackbar.LENGTH_SHORT,
-      });
-    } finally {
-      navigation.push('/');
-      Snackbar.show({
-        text: t('Profile updated successfully'),
-        duration: Snackbar.LENGTH_SHORT,
-      });
+
+    if (me.profilePicture !== newMe.profilePicture && newMe.profilePicture) {
+      setProfileImage(me.id, newMe?.profilePicture ?? defaultFirebaseProfilePicture);
     }
+
+    const { profilePicture, ...userMe } = newMe;
+
+    setFireUser({
+      user: userMe,
+      update: true,
+    });
+
+    realm.write(() => {
+      const usr = realm.objectForPrimaryKey<UserType>('User', me.id || '');
+      if (!usr) return;
+      usr.profilePicture = newMe.profilePicture;
+      usr.name = newMe.name;
+      usr.age = newMe.age;
+      usr.name = newMe.name;
+      usr.gender = newMe.gender;
+      usr.bio = newMe.bio;
+    });
+
+    navigation.push('/');
+    Snackbar.show({
+      text: t('Profile updated successfully'),
+      duration: Snackbar.LENGTH_SHORT,
+    });
   };
 
   const handleProfilePhotoPick = async () => {

@@ -23,7 +23,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.foln.chalk",
-      "versionCode": 38
+      "versionCode": 40
     },
     "plugins": [
       "@react-native-firebase/app",

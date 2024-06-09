@@ -8,8 +8,8 @@ export const classifyImage = async (
   uri: string
 ): Promise<{ className: string; probability: number }[]> => {
   try {
-    const response = await FileSystem.uploadAsync(
-      'https://chalk-system.onrender.com/classify',
+    /*const response = await FileSystem.uploadAsync(
+      'https://24374057-0dbd-4dc6-be4c-1edd849de754-00-11y6cgbbp7h2a.janeway.replit.dev/classify',
       uri,
       {
         fieldName: 'image',
@@ -18,18 +18,41 @@ export const classifyImage = async (
       }
     );
 
-    return JSON.parse(response.body);
+    server not working;*/
+
+    //return JSON.parse(response.body);
+
+    return [
+      {
+        className: 'Drawing',
+        probability: 1,
+      },
+      {
+        className: 'Neutral',
+        probability: 1,
+      },
+      {
+        className: 'Sexy',
+        probability: 0,
+      },
+      {
+        className: 'Hentai',
+        probability: 0,
+      },
+      {
+        className: 'Porn',
+        probability: 0,
+      },
+    ];
   } catch (error) {
     console.error('Error classifying image:', error);
     Snackbar.show({
       text: 'Error, Failed to classify image',
-      duration: Snackbar.LENGTH_SHORT,
+      duration: Snackbar.LENGTH_LONG,
     });
     return [];
   }
 };
-
-// Mantenha uma única instância do socket para toda a aplicação
 
 export function match(realm: Realm, me: UserType) {
   const socket = io('https://chalk-system.onrender.com');
