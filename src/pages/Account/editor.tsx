@@ -96,15 +96,26 @@ function MyProfile({ navigation }: any) {
 
   const onHandleDone = async () => {
     if (!me.id || newMe === me) return;
+    let mePic = me.profilePicture;
 
     if (me.profilePicture !== newMe.profilePicture && newMe.profilePicture) {
-      setProfileImage(me.id, newMe?.profilePicture ?? defaultFirebaseProfilePicture);
+      mePic = (await setProfileImage(me.id, newMe?.profilePicture ?? defaultFirebaseProfilePicture))
+        .url;
     }
 
     const { profilePicture, ...userMe } = newMe;
 
     setFireUser({
-      user: userMe,
+      user: {
+        ...userMe,
+        profilePicture: mePic,
+        matchingConfig: {
+          from: me.matchingConfig.from,
+          to: me.matchingConfig.to,
+          genders: JSON.parse(JSON.stringify(me.matchingConfig.genders)),
+          lang: me.matchingConfig.lang,
+        },
+      },
       update: true,
     });
 

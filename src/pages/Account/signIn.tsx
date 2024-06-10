@@ -136,13 +136,15 @@ function SignIn({ navigation }: any) {
 
     const obj = {
       id: userCredential.user.uid,
-      name: firebaseUser?.name || '',
-      age: firebaseUser?.age || 18,
-      bio: firebaseUser?.bio || '<bio>',
-      profilePicture: firebaseUser?.profilePicture || defaultFirebaseProfilePicture,
-      gender: firebaseUser?.gender || 'Prefer not to state',
-      authenticated: firebaseUser?.authenticated || false,
+      name: firebaseUser?.name ?? '',
+      age: firebaseUser?.age ?? 18,
+      bio: firebaseUser?.bio ?? '<bio>',
+      profilePicture: firebaseUser?.profilePicture ?? defaultFirebaseProfilePicture,
+      gender: firebaseUser?.gender ?? 'Prefer not to state',
+      authenticated: firebaseUser?.authenticated ?? false,
     };
+
+    console.log(obj);
 
     if (!firebaseUser?.gender)
       // temporaly
@@ -154,6 +156,7 @@ function SignIn({ navigation }: any) {
       // temporaly
       setUser({ user: { ...firebaseUser, matchingConfig: matchingConfig } });
 
+    setUser({ user: { ...firebaseUser, matchingConfig: { ...matchingConfig } } });
     createRealmUser(realm, { ...obj, matchingConfig });
 
     AsyncStorage.setItem('my-uid', userCredential.user.uid);

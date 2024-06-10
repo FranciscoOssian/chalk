@@ -111,7 +111,7 @@ const SignUp = ({ navigation }: any) => {
 
     const obj = {
       id: userCredential.user.uid,
-      name: userCredential.user.displayName || 'Anon',
+      name: userCredential.user.displayName ?? 'Anon',
       age: 18,
       bio: '<bio>',
       profilePicture: photoLink ?? defaultFirebaseProfilePicture,
