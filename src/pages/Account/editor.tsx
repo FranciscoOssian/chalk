@@ -131,6 +131,7 @@ function MyProfile({ navigation }: any) {
     });
 
     navigation.push('/');
+
     Snackbar.show({
       text: t('Profile updated successfully'),
       duration: Snackbar.LENGTH_SHORT,
