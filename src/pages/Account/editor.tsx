@@ -90,10 +90,8 @@ function MyProfile({ navigation }: any) {
   const [_, pick] = usePicker({ base64: false });
 
   const onSetterUser = (prop: string, value: any) => {
-    if (!value || !prop) return;
-    const temp: any = newMe;
-    temp[prop] = value;
-    setNewMe((temp) => ({ ...temp }));
+    const temp: any = { ...newMe, [prop]: value };
+    setNewMe(temp);
   };
 
   const onHandleDone = async () => {
